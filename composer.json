@@ -1,0 +1,32 @@
+{
+  "name": "bingo-soft/phpdocxtemplate",
+  "description": "PHP library which uses docx files as Twig templates",
+  "keywords": ["php", "docx", "report", "reporting", "template", "twig"],
+  "license": "MIT",
+  "type": "project",
+  "authors": [{
+    "name": "Bingo-Soft",
+    "email": "bingosoft@bk.ru"
+  }],
+  "config": {
+    "vendor-dir": "./vendor"
+  },
+  "require": {
+    "twig/twig":"^3.0"
+  },
+  "require-dev": {
+    "doctrine/coding-standard": "^6.0",
+    "squizlabs/php_codesniffer": "3.*",
+    "phpunit/phpunit": "^8"
+  },
+  "autoload": {
+    "psr-4": {
+      "PhpDocxTemplate\\": "./src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "./tests"
+    }
+  }
+}
