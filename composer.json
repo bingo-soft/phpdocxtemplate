@@ -12,6 +12,7 @@
     "vendor-dir": "./vendor"
   },
   "require": {
+    "php": "^7.2",
     "twig/twig":"^3.0"
   },
   "require-dev": {
