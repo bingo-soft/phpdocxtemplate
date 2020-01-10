@@ -49,10 +49,6 @@ class DocxDocument
         
         mkdir($this->tmpDir);
 
-        //$zipFile = new ZipFile();
-        //$zipFile->openFile($this->path);
-        //$zipFile->extractTo($this->tmpDir);
-
         $zip = new ZipArchive();
         $zip->open($this->path);
         $zip->extractTo($this->tmpDir);
