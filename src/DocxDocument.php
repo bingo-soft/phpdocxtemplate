@@ -31,7 +31,7 @@ class DocxDocument
     {
         if (file_exists($path)) {
             $this->path = $path;
-            $this->tmpDir .= uniqid(true) . date("His");
+            $this->tmpDir .= uniqid("", true) . date("His");
             $this->extract();
         } else {
             throw new Exception("The template " . $path . " was not found!");
@@ -93,11 +93,13 @@ class DocxDocument
         $dom->loadXML($xml);
         $tables = $dom->getElementsByTagName('tbl');
         foreach ($tables as $table) {
+            $columns = [];
+            $columnsLen = 0;
+            $toAdd = 0;
+            $tableGrid = null;
             foreach ($table->childNodes as $el) {
                 if ($el->nodeName == 'w:tblGrid') {
                     $tableGrid = $el;
-                    $columns = [];
-                    $columnsLen = 0;
                     foreach ($el->childNodes as $col) {
                         if ($col->nodeName == 'w:gridCol') {
                             $columns[] = $col;
@@ -105,7 +107,6 @@ class DocxDocument
                         }
                     }
                 } elseif ($el->nodeName == 'w:tr') {
-                    $toAdd = 0;
                     $cellsLen = 0;
                     foreach ($el->childNodes as $col) {
                         if ($col->nodeName == 'w:tc') {
@@ -119,7 +120,7 @@ class DocxDocument
             }
 
             // add columns, if necessary
-            if ($toAdd > 0) {
+            if (!is_null($tableGrid) && $toAdd > 0) {
                 $width = 0;
                 foreach ($columns as $col) {
                     if (!is_null($col->getAttribute('w:w'))) {
@@ -149,8 +150,9 @@ class DocxDocument
                 }
             }
             $columnsLen = count($columns);
+
+            $cellsLen = 0;
             $cellsLenMax = 0;
-            
             foreach ($table->childNodes as $el) {
                 if ($el->nodeName == 'w:tr') {
                     $cells = [];
