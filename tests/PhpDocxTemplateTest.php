@@ -22,7 +22,7 @@ class PhpDocxTemplateTest extends TestCase
         $title = $xml->createElement('title');
         $title = $root->appendChild($title);
         $text = $xml->createTextNode('Title');
-        $text = $title->appendChild($text);
+        $title->appendChild($text);
         $reporter = new PhpDocxTemplate(self::TEMPLATE1);
 
         $this->assertEquals(

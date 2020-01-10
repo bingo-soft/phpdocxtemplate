@@ -255,8 +255,8 @@ class DocxDocument
      */
     private function rrmdir(string $dir): void
     {
-        if (is_dir($dir)) {
-            $objects = scandir($dir);
+        $objects = scandir($dir);
+        if (is_array($objects)) {
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
                     if (filetype($dir . "/" . $object) == "dir") {
