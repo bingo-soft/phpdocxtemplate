@@ -13,6 +13,8 @@ class PhpDocxTemplateTest extends TestCase
 {
     private const TEMPLATE1 = __DIR__ . "/templates/template1.docx";
     private const TEMPLATE2 = __DIR__ . "/templates/template2.docx";
+    private const TEMPLATE3 = __DIR__ . "/templates/template3.docx";
+    private const TEMPLATE4 = __DIR__ . "/templates/template4.docx";
 
     public function testXmlToString(): void
     {
@@ -298,5 +300,79 @@ class PhpDocxTemplateTest extends TestCase
             "d w:linePitch=\"360\"/></w:sectPr></w:body></w:document>\n"
         );
         $reporter->save("./tmp/test.docx");
+    }
+
+    public function testCyrillic(): void
+    {
+        $reporter = new PhpDocxTemplate(self::TEMPLATE3);
+        $reporter->render(["один" => "значение"]);
+        $this->assertEquals(
+            $reporter->getXml(),
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" .
+            "<w:document xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:c" .
+            "x=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft." .
+            "com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/1" .
+            "0/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=" .
+            "\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microso" .
+            "ft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/20" .
+            "16/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:" .
+            "cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.open" .
+            "xmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/" .
+            "2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:sch" .
+            "emas-microsoft-com:office:office\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/r" .
+            "elationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:" .
+            "schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessin" .
+            "gDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns" .
+            ":w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w=\"http://schemas.openxmlformats.org/wordproce" .
+            "ssingml/2006/main\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"h" .
+            "ttp://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cid=\"http://schemas.microsoft.com/of" .
+            "fice/word/2016/wordml/cid\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex" .
+            "\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http:" .
+            "//schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.co" .
+            "m/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessing" .
+            "Shape\" mc:Ignorable=\"w14 w15 w16se w16cid wp14\"><w:body><w:p w14:paraId=\"504F2588\" w14:textId=" .
+            "\"0B366F38\" w:rsidR=\"0090657C\" w:rsidRPr=\"00BC38E6\" w:rsidRDefault=\"00BC38E6\" w:rsidP=\"003306" .
+            "2B\"><w:pPr><w:rPr><w:lang w:val=\"en-US\"/></w:rPr></w:pPr><w:r><w:rPr><w:lang w:val=\"en-US\"/></w" .
+            ":rPr><w:t xml:space=\"preserve\">значение</w:t></w:r><w:bookmarkStart w:id=\"0\" w:name=\"_GoBack\"/>" .
+            "<w:bookmarkEnd w:id=\"0\"/></w:p><w:sectPr w:rsidR=\"0090657C\" w:rsidRPr=\"00BC38E6\"><w:pgSz w:w=\"" .
+            "11906\" w:h=\"16838\"/><w:pgMar w:top=\"1134\" w:right=\"850\" w:bottom=\"1134\" w:left=\"1701\" w:he" .
+            "ader=\"708\" w:footer=\"708\" w:gutter=\"0\"/><w:cols w:space=\"708\"/><w:docGrid w:linePitch=\"360\"/><" .
+            "/w:sectPr></w:body></w:document>\n"
+        );
+    }
+
+    public function testForLoop(): void
+    {
+        $reporter = new PhpDocxTemplate(self::TEMPLATE4);
+        $reporter->render(["сотрудники" => [
+            [
+                "фамилия" => "Иванов",
+                "имя" => "Иван",
+                "отчество" => "Иванович",
+                "дети" => [
+                    [
+                        "фамилия" => "Иванова",
+                        "имя" => "Алена",
+                        "отчество" => "Ивановна",
+                        "возраст" => 25
+                    ],
+                    [
+                        "фамилия" => "Иванов",
+                        "имя" => "Михаил",
+                        "отчество" => "Иванович",
+                        "возраст" => 6
+                    ]
+                ],
+                "возраст" => 50
+            ],
+            [
+                "фамилия" => "Петров",
+                "имя" => "Петр",
+                "отчество" => "Петрович",
+                "возраст" => 30
+            ]
+        ]]);
+        //echo $reporter->getXml();
+        $reporter->save("./tmp/report4.docx");
     }
 }

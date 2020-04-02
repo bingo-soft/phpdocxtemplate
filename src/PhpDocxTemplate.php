@@ -337,6 +337,13 @@ class PhpDocxTemplate
             ['<w:p>', "{{", '}}', '{%', '%}'],
             $dstXml
         );
+
+        // fix xml after rendering
+        $dstXml = preg_replace(
+            '/<w:p [^>]*>(?:(<w:pPr><w:ind [^>]*\/><\/w:pPr>)?)<w:r [^>]*>(?:<w:t\/>|<w:t [^>]*\/>)<\/w:r><\/w:p>/mu',
+            '',
+            $dstXml
+        );
         return $dstXml;
     }
 
