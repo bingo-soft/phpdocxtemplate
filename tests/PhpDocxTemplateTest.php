@@ -372,7 +372,60 @@ class PhpDocxTemplateTest extends TestCase
                 "возраст" => 30
             ]
         ]]);
-        //echo $reporter->getXml();
-        $reporter->save("./tmp/report4.docx");
+        $this->assertEquals(
+            $reporter->getXml(),
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" .
+            "<w:document xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:c" .
+            "x=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft." .
+            "com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/1" .
+            "0/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=" .
+            "\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microso" .
+            "ft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/20" .
+            "16/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:" .
+            "cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.open" .
+            "xmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/" .
+            "2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:sch" .
+            "emas-microsoft-com:office:office\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/r" .
+            "elationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:" .
+            "schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessin" .
+            "gDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns" .
+            ":w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w=\"http://schemas.openxmlformats.org/wordproce" .
+            "ssingml/2006/main\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"h" .
+            "ttp://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cid=\"http://schemas.microsoft.com/of" .
+            "fice/word/2016/wordml/cid\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex" .
+            "\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http:" .
+            "//schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.co" .
+            "m/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessing" .
+            "Shape\" mc:Ignorable=\"w14 w15 w16se w16cid wp14\"><w:body><w:p w14:paraId=\"45D5C362\" w14:textId=" .
+            "\"79C82D83\" w:rsidR=\"00AF4B5B\" w:rsidRDefault=\"005D75A1\" w:rsidP=\"006B0D50\"><w:pPr><w:pStyle w" .
+            ":val=\"a4\"/><w:numPr><w:ilvl w:val=\"0\"/><w:numId w:val=\"2\"/></w:numPr></w:pPr><w:proofErr w:typ" .
+            "e=\"gramStart\"/><w:r w:rsidRPr=\"005D75A1\"><w:t xml:space=\"preserve\">Иванов Иван Иванович</w:t><" .
+            "/w:r><w:r w:rsidR=\"00FE09C8\" w:rsidRPr=\"00FE09C8\"><w:t xml:space=\"preserve\">, </w:t></w:r><w:r" .
+            " w:rsidR=\"00FE09C8\"><w:t>возраст</w:t></w:r><w:r w:rsidR=\"00FE09C8\" w:rsidRPr=\"00FE09C8\"><w:t>" .
+            ":</w:t></w:r><w:r w:rsidR=\"005E422E\"><w:t xml:space=\"preserve\"> </w:t></w:r><w:r w:rsidR=\"005E4" .
+            "22E\" w:rsidRPr=\"00DE2B94\"><w:t>50</w:t></w:r></w:p><w:p w14:paraId=\"78D1FA3D\" w14:textId=\"55EF" .
+            "7A47\" w:rsidR=\"00AF4B5B\" w:rsidRDefault=\"00DE2B94\" w:rsidP=\"0031223E\"><w:pPr><w:pStyle w:val=" .
+            "\"a4\"/></w:pPr><w:r><w:t xml:space=\"preserve\">- </w:t></w:r><w:proofErr w:type=\"gramStart\"/><w:" .
+            "r w:rsidRPr=\"00DE2B94\"><w:t xml:space=\"preserve\">Иванова Алена Ивановна</w:t></w:r><w:r w:rsidR=" .
+            "\"00126257\" w:rsidRPr=\"00126257\"><w:t xml:space=\"preserve\"> </w:t></w:r></w:p><w:p w14:paraId=" .
+            "\"78D1FA3D\" w14:textId=\"55EF7A47\" w:rsidR=\"00AF4B5B\" w:rsidRDefault=\"00DE2B94\" w:rsidP=\"00312" .
+            "23E\"><w:pPr><w:pStyle w:val=\"a4\"/></w:pPr><w:r><w:t xml:space=\"preserve\">- </w:t></w:r><w:proofErr " .
+            "w:type=\"gramStart\"/><w:r w:rsidRPr=\"00DE2B94\"><w:t xml:space=\"preserve\">Иванов Михаил Иванович" .
+            "</w:t></w:r><w:r w:rsidR=\"00126257\" w:rsidRPr=\"00126257\"><w:t xml:space=\"preserve\"> </w:t></w:" .
+            "r></w:p><w:p w14:paraId=\"45D5C362\" w14:textId=\"79C82D83\" w:rsidR=\"00AF4B5B\" w:rsidRDefault=\"0" .
+            "05D75A1\" w:rsidP=\"006B0D50\"><w:pPr><w:pStyle w:val=\"a4\"/><w:numPr><w:ilvl w:val=\"0\"/><w:numId" .
+            " w:val=\"2\"/></w:numPr></w:pPr><w:proofErr w:type=\"gramStart\"/><w:r w:rsidRPr=\"005D75A1\"><w:t x" .
+            "ml:space=\"preserve\">Петров Петр Петрович</w:t></w:r><w:r w:rsidR=\"00FE09C8\" w:rsidRPr=\"00FE09C8" .
+            "\"><w:t xml:space=\"preserve\">, </w:t></w:r><w:r w:rsidR=\"00FE09C8\"><w:t>возраст</w:t></w:r><w:r " .
+            "w:rsidR=\"00FE09C8\" w:rsidRPr=\"00FE09C8\"><w:t>:</w:t></w:r><w:r w:rsidR=\"005E422E\"><w:t xml:spa" .
+            "ce=\"preserve\"> </w:t></w:r><w:r w:rsidR=\"005E422E\" w:rsidRPr=\"00DE2B94\"><w:t>30</w:t></w:r></w" .
+            ":p><w:p w14:paraId=\"4B66446E\" w14:textId=\"2D5C0B86\" w:rsidR=\"0024376E\" w:rsidRDefault=\"002437" .
+            "6E\" w:rsidP=\"00AF4B5B\"/><w:p w14:paraId=\"3F32EC2C\" w14:textId=\"77777777\" w:rsidR=\"0024376E\"" .
+            " w:rsidRPr=\"008D21C0\" w:rsidRDefault=\"0024376E\" w:rsidP=\"00AF4B5B\"/><w:sectPr w:rsidR=\"002437" .
+            "6E\" w:rsidRPr=\"008D21C0\"><w:pgSz w:w=\"11906\" w:h=\"16838\"/><w:pgMar w:top=\"1134\" w:right=\"8" .
+            "50\" w:bottom=\"1134\" w:left=\"1701\" w:header=\"708\" w:footer=\"708\" w:gutter=\"0\"/><w:cols w:s" .
+            "pace=\"708\"/><w:docGrid w:linePitch=\"360\"/></w:sectPr></w:body></w:document>\n"
+        );
+        //$reporter->save("./tmp/report4.docx");
     }
 }

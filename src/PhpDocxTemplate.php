@@ -340,7 +340,8 @@ class PhpDocxTemplate
 
         // fix xml after rendering
         $dstXml = preg_replace(
-            '/<w:p [^>]*>(?:(<w:pPr><w:ind [^>]*\/><\/w:pPr>)?)<w:r [^>]*>(?:<w:t\/>|<w:t [^>]*\/>)<\/w:r><\/w:p>/mu',
+            '/<w:p [^>]*>(?:<w:r [^>]*><w:t [^>]*>\s*<\/w:t><\/w:r>)?(?:<w:pPr><w:ind w:left="360"\/>' .
+            '<\/w:pPr>)?<w:r [^>]*>(?:<w:t\/>|<w:t [^>]*><\/w:t>|<w:t [^>]*\/>|<w:t><\/w:t>)<\/w:r><\/w:p>/mu',
             '',
             $dstXml
         );
