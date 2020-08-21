@@ -24,11 +24,22 @@ class DocxDocument
      * Construct an instance of Document
      *
      * @param string $path - path to the document
+     * @param string $tmpPath - path to the temp directory
      *
      * @throws Exception
      */
-    public function __construct(string $path)
+    public function __construct(string $path, ?string $tmpPath = null)
     {
+        if (!empty($tmpPath)) {
+            if (!is_dir($tmpPath) && !mkdir($tmpPath, 0777, true)) {
+                throw new Exception(
+                    "The specified path \"" . $tmpPath . "\" for \"temp\" folder is not valid"
+                );
+            }
+
+            $this->tmpDir = $tmpPath . "/";
+        }
+
         if (file_exists($path)) {
             $this->path = $path;
             $this->tmpDir .= uniqid("", true) . date("His");
@@ -46,7 +57,7 @@ class DocxDocument
         if (file_exists($this->tmpDir) && is_dir($this->tmpDir)) {
             $this->rrmdir($this->tmpDir);
         }
-        
+
         mkdir($this->tmpDir);
 
         $zip = new ZipArchive();

@@ -32,10 +32,11 @@ class PhpDocxTemplate
      * Construct an instance of PhpDocxTemplate
      *
      * @param string $path - path to the template
+     * @param string $tmpPath - path to the temp directory
      */
-    public function __construct(string $path)
+    public function __construct(string $path, ?string $tmpPath = null)
     {
-        $this->docx = new DocxDocument($path);
+        $this->docx = new DocxDocument($path, $tmpPath);
         $this->crcToNewMedia = [];
         $this->crcToNewEmbedded = [];
         $this->picToReplace = [];
@@ -128,7 +129,7 @@ class PhpDocxTemplate
             '</w:t></w:r><w:r><w:t xml:space="preserve">${1}</w:t></w:r><w:r><w:t xml:space="preserve">',
             $xml
         );
-        
+
         // replace into xml code the row/paragraph/run containing
         // {%y xxx %} or {{y xxx}} template tag
         // by {% xxx %} or {{ xx }} without any surronding <w:y> tags
@@ -326,7 +327,7 @@ class PhpDocxTemplate
     private function renderXml(string $srcXml, array $context): string
     {
         $srcXml = str_replace('<w:p>', "\n<w:p>", $srcXml);
-        
+
         $template = new Environment(new ArrayLoader([
             'index' => $srcXml,
         ]));
