@@ -5,7 +5,7 @@ namespace PhpDocxTemplate;
 use DOMDocument;
 use DOMElement;
 use Exception;
-use ZipArchive;
+use PhpZip\ZipFile;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 
@@ -51,6 +51,8 @@ class DocxDocument
 
     /**
      * Extract (unzip) document contents
+     *
+     * @throws \PhpZip\Exception\ZipException
      */
     private function extract(): void
     {
@@ -60,8 +62,8 @@ class DocxDocument
 
         mkdir($this->tmpDir);
 
-        $zip = new ZipArchive();
-        $zip->open($this->path);
+        $zip = new ZipFile();
+        $zip->openFile($this->path);
         $zip->extractTo($this->tmpDir);
         $zip->close();
 
@@ -233,13 +235,14 @@ class DocxDocument
      * Save the document to the target path
      *
      * @param string $path - target path
+     *
+     * @throws \PhpZip\Exception\ZipException
      */
     public function save(string $path): void
     {
         $rootPath = realpath($this->tmpDir);
 
-        $zip = new ZipArchive();
-        $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        $zip = new ZipFile();
 
         $files = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($rootPath),
@@ -254,6 +257,7 @@ class DocxDocument
             }
         }
 
+        $zip->saveAsFile($path);
         $zip->close();
 
         $this->rrmdir($this->tmpDir);

@@ -13,7 +13,8 @@
   },
   "require": {
     "php": "^7.2",
-    "twig/twig":"^3.0"
+    "twig/twig":"^3.0",
+    "nelexa/zip": "^3.3"
   },
   "require-dev": {
     "doctrine/coding-standard": "^6.0",
