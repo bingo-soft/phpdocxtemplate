@@ -1,5 +1,5 @@
 {
-  "name": "bingo-soft/phpdocxtemplate",
+  "name": "voinmerk/phpdocxtemplate",
   "description": "PHP library which uses docx files as Twig templates",
   "keywords": ["php", "docx", "report", "reporting", "template", "twig"],
   "license": "MIT",
