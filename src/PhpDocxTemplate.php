@@ -128,7 +128,7 @@ class PhpDocxTemplate
             '</w:t></w:r><w:r><w:t xml:space="preserve">${1}</w:t></w:r><w:r><w:t xml:space="preserve">',
             $xml
         );
-        
+
         // replace into xml code the row/paragraph/run containing
         // {%y xxx %} or {{y xxx}} template tag
         // by {% xxx %} or {{ xx }} without any surronding <w:y> tags
@@ -165,6 +165,71 @@ class PhpDocxTemplate
         $xml = preg_replace_callback(
             '/(?<=\{[\{%])(.*?)(?=[\}%]})/mu',
             array(get_class($this), 'cleanTags'),
+            $xml
+        );
+
+        return $xml;
+    }
+
+    private function resolveListing(string $xml): string
+    {
+        return preg_replace_callback(
+            '/<w:p(?:[^>]*)?>.*?<\/w:p>/mus',
+            array(get_class($this), 'resolveParagraph'),
+            $xml
+        );
+    }
+
+    private function resolveParagraph(array $matches): string
+    {
+        preg_match("/<w:pPr>.*<\/w:pPr>/mus", $matches[0], $paragraphProperties);
+
+        return preg_replace_callback(
+            '/<w:r(?:[^>]*)?>.*?<\/w:r>/mus',
+            function ($m) {
+                return $this->resolveRun($paragraphProperties[0] ?? '', $m);
+            },
+            $matches[0]
+        );
+    }
+
+    private function resolveRun(string $paragraphProperties, array $matches): string
+    {
+        preg_match("/<w:rPr>.*<\/w:rPr>/mus", $matches[0], $runProperties);
+
+        return preg_replace_callback(
+            '/<w:t(?:[^>]*)?>.*?<\/w:t>/mus',
+            function ($m) use ($paragraphProperties) {
+                return $this->resolveText($paragraphProperties, $runProperties[0] ?? '', $m);
+            },
+            $matches[0]
+        );
+    }
+
+    private function resolveText(string $paragraphProperties, string $runProperties, array $matches): string
+    {
+        $xml = str_replace(
+            "\t",
+            sprintf("</w:t></w:r>
+                                     <w:r>%s<w:tab/></w:r>
+                                     <w:r>%s<w:t xml:space=\"preserve\">", $runProperties, $runProperties),
+            $matches[0]
+        );
+
+        $xml = str_replace(
+            "\a",
+            sprintf("</w:t></w:r></w:p>
+                                    <w:p>%s<w:r>%s<w:t xml:space=\"preserve\">", $paragraphProperties, $runProperties),
+            $xml
+        );
+
+        $xml = str_replace("\n", "</w:t><w:br/><w:t xml:space=\"preserve\">", $xml);
+
+        $xml = str_replace(
+            "\f",
+            sprintf("</w:t></w:r></w:p>
+                                    <w:p><w:r><w:br w:type=\"page\"/></w:r></w:p>
+                                    <w:p>%s<w:r>%s<w:t xml:space=\"preserve\">", $paragraphProperties, $runProperties),
             $xml
         );
 
@@ -345,6 +410,9 @@ class PhpDocxTemplate
             '',
             $dstXml
         );
+
+        $dstXml = $this->resolveListing($dstXml);
+
         return $dstXml;
     }
 
