@@ -333,8 +333,8 @@ class PhpDocxTemplateTest extends TestCase
             "Shape\" mc:Ignorable=\"w14 w15 w16se w16cid wp14\"><w:body><w:p w14:paraId=\"504F2588\" w14:textId=" .
             "\"0B366F38\" w:rsidR=\"0090657C\" w:rsidRPr=\"00BC38E6\" w:rsidRDefault=\"00BC38E6\" w:rsidP=\"003306" .
             "2B\"><w:pPr><w:rPr><w:lang w:val=\"en-US\"/></w:rPr></w:pPr><w:r><w:rPr><w:lang w:val=\"en-US\"/></w" .
-            ":rPr><w:t xml:space=\"preserve\">значение с </w:t><w:br/><w:t xml:space=\"preserve\"> переносом строки" .
-            "</w:t></w:r><w:bookmarkStart w:id=\"0\" w:name=\"_GoBack\"/>" .
+            ":rPr><w:t xml:space=\"preserve\">значение с </w:t></w:r></w:p><w:p><w:r><w:t xml:space=\"preserve\">".
+            " переносом строки</w:t></w:r><w:bookmarkStart w:id=\"0\" w:name=\"_GoBack\"/>" .
             "<w:bookmarkEnd w:id=\"0\"/></w:p><w:sectPr w:rsidR=\"0090657C\" w:rsidRPr=\"00BC38E6\"><w:pgSz w:w=\"" .
             "11906\" w:h=\"16838\"/><w:pgMar w:top=\"1134\" w:right=\"850\" w:bottom=\"1134\" w:left=\"1701\" w:he" .
             "ader=\"708\" w:footer=\"708\" w:gutter=\"0\"/><w:cols w:space=\"708\"/><w:docGrid w:linePitch=\"360\"/><" .

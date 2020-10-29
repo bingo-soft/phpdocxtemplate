@@ -210,26 +210,31 @@ class PhpDocxTemplate
     {
         $xml = str_replace(
             "\t",
-            sprintf("</w:t></w:r>
-                                     <w:r>%s<w:tab/></w:r>
-                                     <w:r>%s<w:t xml:space=\"preserve\">", $runProperties, $runProperties),
+            sprintf("</w:t></w:r>" .
+                "<w:r>%s<w:tab/></w:r>" .
+                "<w:r>%s<w:t xml:space=\"preserve\">", $runProperties, $runProperties),
             $matches[0]
         );
 
         $xml = str_replace(
             "\a",
-            sprintf("</w:t></w:r></w:p>
-                                    <w:p>%s<w:r>%s<w:t xml:space=\"preserve\">", $paragraphProperties, $runProperties),
+            sprintf("</w:t></w:r></w:p>" .
+                "<w:p>%s<w:r>%s<w:t xml:space=\"preserve\">", $paragraphProperties, $runProperties),
             $xml
         );
 
-        $xml = str_replace("\n", "</w:t><w:br/><w:t xml:space=\"preserve\">", $xml);
+        $xml = str_replace("\n", sprintf("</w:t>" .
+            "</w:r>" .
+            "</w:p>" .
+            "<w:p>%s" .
+            "<w:r>%s" .
+            "<w:t xml:space=\"preserve\">", $paragraphProperties, $runProperties), $xml);
 
         $xml = str_replace(
             "\f",
-            sprintf("</w:t></w:r></w:p>
-                                    <w:p><w:r><w:br w:type=\"page\"/></w:r></w:p>
-                                    <w:p>%s<w:r>%s<w:t xml:space=\"preserve\">", $paragraphProperties, $runProperties),
+            sprintf("</w:t></w:r></w:p>" .
+                "<w:p><w:r><w:br w:type=\"page\"/></w:r></w:p>" .
+                "<w:p>%s<w:r>%s<w:t xml:space=\"preserve\">", $paragraphProperties, $runProperties),
             $xml
         );
 
@@ -391,7 +396,7 @@ class PhpDocxTemplate
     private function renderXml(string $srcXml, array $context): string
     {
         $srcXml = str_replace('<w:p>', "\n<w:p>", $srcXml);
-        
+
         $template = new Environment(new ArrayLoader([
             'index' => $srcXml,
         ]));
