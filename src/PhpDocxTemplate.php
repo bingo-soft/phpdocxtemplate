@@ -174,7 +174,7 @@ class PhpDocxTemplate
     private function resolveListing(string $xml): string
     {
         return preg_replace_callback(
-            '/<w:p(?:[^>]*)?>.*?<\/w:p>/mus',
+            '/<w:p\b(?:[^>]*)?>.*?<\/w:p>/mus',
             array(get_class($this), 'resolveParagraph'),
             $xml
         );
@@ -185,8 +185,8 @@ class PhpDocxTemplate
         preg_match("/<w:pPr>.*<\/w:pPr>/mus", $matches[0], $paragraphProperties);
 
         return preg_replace_callback(
-            '/<w:r(?:[^>]*)?>.*?<\/w:r>/mus',
-            function ($m) {
+            '/<w:r\b(?:[^>]*)?>.*?<\/w:r>/mus',
+            function ($m) use ($paragraphProperties) {
                 return $this->resolveRun($paragraphProperties[0] ?? '', $m);
             },
             $matches[0]
@@ -198,8 +198,8 @@ class PhpDocxTemplate
         preg_match("/<w:rPr>.*<\/w:rPr>/mus", $matches[0], $runProperties);
 
         return preg_replace_callback(
-            '/<w:t(?:[^>]*)?>.*?<\/w:t>/mus',
-            function ($m) use ($paragraphProperties) {
+            '/<w:t\b(?:[^>]*)?>.*?<\/w:t>/mus',
+            function ($m) use ($paragraphProperties, $runProperties) {
                 return $this->resolveText($paragraphProperties, $runProperties[0] ?? '', $m);
             },
             $matches[0]
