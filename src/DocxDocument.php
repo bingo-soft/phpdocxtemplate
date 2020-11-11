@@ -17,7 +17,7 @@ use RecursiveDirectoryIterator;
 class DocxDocument
 {
     private $path;
-    private $tmpDir = "./tmp/";
+    private $tmpDir;
     private $document;
 
     /**
@@ -31,7 +31,7 @@ class DocxDocument
     {
         if (file_exists($path)) {
             $this->path = $path;
-            $this->tmpDir .= uniqid("", true) . date("His");
+            $this->tmpDir = sys_get_temp_dir() . "/" . uniqid("", true) . date("His");
             $this->extract();
         } else {
             throw new Exception("The template " . $path . " was not found!");

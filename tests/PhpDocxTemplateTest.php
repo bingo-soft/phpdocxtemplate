@@ -299,7 +299,7 @@ class PhpDocxTemplateTest extends TestCase
             "w:left=\"1701\" w:header=\"708\" w:footer=\"708\" w:gutter=\"0\"/><w:cols w:space=\"708\"/><w:docGri" .
             "d w:linePitch=\"360\"/></w:sectPr></w:body></w:document>\n"
         );
-        $reporter->save("./tmp/test.docx");
+        $reporter->save(sys_get_temp_dir() . "/test.docx");
     }
 
     public function testLineBreak(): void
@@ -467,6 +467,5 @@ class PhpDocxTemplateTest extends TestCase
             "50\" w:bottom=\"1134\" w:left=\"1701\" w:header=\"708\" w:footer=\"708\" w:gutter=\"0\"/><w:cols w:s" .
             "pace=\"708\"/><w:docGrid w:linePitch=\"360\"/></w:sectPr></w:body></w:document>\n"
         );
-        //$reporter->save("./tmp/report4.docx");
     }
 }
