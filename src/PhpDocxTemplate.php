@@ -141,7 +141,7 @@ class PhpDocxTemplate
             '/-%}(?:(?!<w:t[ >]).)*?<w:t[^>]*?>/mu',
             '%}',
             $xml
-        );      
+        );
 
         // replace into xml code the row/paragraph/run containing
         // {%y xxx %} or {{y xxx}} template tag
@@ -149,13 +149,7 @@ class PhpDocxTemplate
         $tokens = ['tr', 'tc', 'p', 'r'];
         foreach ($tokens as $token) {
             $regex = '/';
-            $regex .= sprintf(
-                '<w:%ss[ >](?:(?!<w:%ss[ >]).)*({%%|{{)%ss ([^}%%]*(?:%%}|}})).*?<\/w:%ss>',
-                $token,
-                $token,
-                $token,
-                $token
-            );
+            $regex .= str_replace("%s", $token, '<w:%s[ >](?:(?!<w:%s[ >]).)*({%|{{)%s ([^}%]*(?:%}|}})).*?<\/w:%s>');
             $regex .= '/mu';
             $xml = preg_replace(
                 $regex,

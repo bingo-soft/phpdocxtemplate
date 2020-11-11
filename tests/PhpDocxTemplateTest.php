@@ -15,6 +15,7 @@ class PhpDocxTemplateTest extends TestCase
     private const TEMPLATE2 = __DIR__ . "/templates/template2.docx";
     private const TEMPLATE3 = __DIR__ . "/templates/template3.docx";
     private const TEMPLATE4 = __DIR__ . "/templates/template4.docx";
+    private const TEMPLATE5 = __DIR__ . "/templates/template5.docx";
 
     public function testXmlToString(): void
     {
@@ -123,26 +124,11 @@ class PhpDocxTemplateTest extends TestCase
             '8woI2.8#[r_Cqig!5Qt{8gl5ls<9Ci|^QN2IK#L[cB9@:XclVQQIxe</w:tc>'
         );
 
-        //test avoid {{r and {%r tags
-        $xml = "<w:t>[x&\P^XIk]sdD((KK{%r  .S-ce4F!b,l8Qo`(>NA;%}";
-        $this->assertEquals(
-            $reporter->patchXml($xml),
-            '<w:t xml:space="preserve">[x&\P^XIk]sdD((KK</w:t></w:r><w:r><w:t xml:space="preserve">' .
-            '{%r  .S-ce4F!b,l8Qo`(>NA;%}</w:t></w:r><w:r><w:t xml:space="preserve">'
-        );
         $xml = "{%r _Rom{X=aC3/s#W#~o<#d:tH^>DTAz;s<}O0RJ#V!wW:]%kR@wzLf*\iu^zAGrr!3]v<SUc|B)o>kA.:*1?,0%}";
         $this->assertEquals(
             $reporter->patchXml($xml),
             '</w:t></w:r><w:r><w:t xml:space="preserve">{%r _Rom{X=aC3/s#W#~o<#d:tH^>DTAz;s<}O0RJ#V!wW:]%kR' .
             '@wzLf*\iu^zAGrr!3]v<SUc|B)o>kA.:*1?,0%}</w:t></w:r><w:r><w:t xml:space="preserve">'
-        );
-
-        // test
-        $xml = "<w:trs>RaYI}@{{trs :k!HJO Z36#T1$3U>6F.=y1_y5w:I7uAWs=_n-(ix*HXPd7){>{V|yPkDIa=" .
-               "cLlQwozlcjFn<_(`&32 PZ1e5_Pqbc@zFR!r0(%}S'orf,78A<S nR=E</w:trs>";
-        $this->assertEquals(
-            $reporter->patchXml($xml),
-            '{{ :k!HJO Z36#T1$3U>6F.=y1_y5w:I7uAWs=_n-(ix*HXPd7){>{V|yPkDIa=cLlQwozlcjFn<_(`&32 PZ1e5_Pqbc@zFR!r0(%}'
         );
 
         // test vMerge
@@ -467,5 +453,23 @@ class PhpDocxTemplateTest extends TestCase
             "50\" w:bottom=\"1134\" w:left=\"1701\" w:header=\"708\" w:footer=\"708\" w:gutter=\"0\"/><w:cols w:s" .
             "pace=\"708\"/><w:docGrid w:linePitch=\"360\"/></w:sectPr></w:body></w:document>\n"
         );
+    }
+
+    public function testTable(): void
+    {
+        $reporter = new PhpDocxTemplate(self::TEMPLATE5);
+        $reporter->render(["records" => [
+            [
+                "a" => "a1",
+                "b" => "b1",
+                "c" => "c1"
+            ],
+            [
+                "a" => "a2",
+                "b" => "b2",
+                "c" => "c2"
+            ]
+        ]]);
+        $this->assertTrue(true);
     }
 }
