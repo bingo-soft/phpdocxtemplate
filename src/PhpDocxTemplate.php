@@ -129,6 +129,20 @@ class PhpDocxTemplate
             $xml
         );
 
+        // {%- will merge with previous paragraph text
+        $xml = preg_replace(
+            '/<\/w:t>(?:(?!<\/w:t>).)*?{%-/mu',
+            '{%',
+            $xml
+        );
+
+        // -%} will merge with next paragraph text
+        $xml = preg_replace(
+            '/-%}(?:(?!<w:t[ >]).)*?<w:t[^>]*?>/mu',
+            '%}',
+            $xml
+        );      
+
         // replace into xml code the row/paragraph/run containing
         // {%y xxx %} or {{y xxx}} template tag
         // by {% xxx %} or {{ xx }} without any surronding <w:y> tags
