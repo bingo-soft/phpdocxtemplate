@@ -4,6 +4,7 @@ namespace PhpDocxTemplate;
 
 use DOMDocument;
 use DOMElement;
+use Exception;
 use Twig\Loader\ArrayLoader;
 use Twig\Environment;
 
@@ -32,11 +33,12 @@ class PhpDocxTemplate
      * Construct an instance of PhpDocxTemplate
      *
      * @param string $path - path to the template
-     * @param string $tmpPath - path to the temp directory
+     *
+     * @throws Exception
      */
-    public function __construct(string $path, ?string $tmpPath = null)
+    public function __construct(string $path)
     {
-        $this->docx = new DocxDocument($path, $tmpPath);
+        $this->docx = new DocxDocument($path);
         $this->crcToNewMedia = [];
         $this->crcToNewEmbedded = [];
         $this->picToReplace = [];

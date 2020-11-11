@@ -24,22 +24,11 @@ class DocxDocument
      * Construct an instance of Document
      *
      * @param string $path - path to the document
-     * @param string $tmpPath - path to the temp directory
      *
      * @throws Exception
      */
-    public function __construct(string $path, ?string $tmpPath = null)
+    public function __construct(string $path)
     {
-        if (!empty($tmpPath)) {
-            if (!is_dir($tmpPath) && !mkdir($tmpPath, 0777, true)) {
-                throw new Exception(
-                    "The specified path \"" . $tmpPath . "\" for \"temp\" folder is not valid"
-                );
-            }
-
-            $this->tmpDir = $tmpPath . "/";
-        }
-
         if (file_exists($path)) {
             $this->path = $path;
             $this->tmpDir .= uniqid("", true) . date("His");
