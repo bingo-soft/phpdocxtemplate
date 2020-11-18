@@ -12,10 +12,10 @@
     "vendor-dir": "./vendor"
   },
   "require": {
+    "ext-zip": "*",
     "ext-dom": "*",
     "php": "^7.2",
-    "twig/twig":"^3.0",
-    "nelexa/zip": "^3.3"
+    "twig/twig":"^3.0"
   },
   "require-dev": {
     "doctrine/coding-standard": "^6.0",
