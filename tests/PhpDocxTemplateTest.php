@@ -730,19 +730,12 @@ class PhpDocxTemplateTest extends TestCase
         $expectedDocumentZip->open($docName);
         $expectedContentTypesXml = $expectedDocumentZip->getFromName('[Content_Types].xml');
         $expectedDocumentRelationsXml = $expectedDocumentZip->getFromName('word/_rels/document.xml.rels');
-        $expectedHeaderRelationsXml = $expectedDocumentZip->getFromName('word/_rels/header1.xml.rels');
-        $expectedFooterRelationsXml = $expectedDocumentZip->getFromName('word/_rels/footer1.xml.rels');
         $expectedMainPartXml = $expectedDocumentZip->getFromName('word/document.xml');
-        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId11_document.jpeg');
+        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId3_document.jpeg');
         if (false === $expectedDocumentZip->close()) {
             throw new \Exception("Could not close zip file \"{$docName}\".");
         }
 
         $this->assertNotEmpty($expectedImage, 'Embed image doesn\'t found.');
-        /*
-        $this->assertContains('/word/media/image_rId11_document.jpeg', $expectedContentTypesXml, '[Content_Types].xml missed "/word/media/image5_document.jpeg"');
-        $this->assertNotContains('${documentContent}', $expectedMainPartXml, 'word/document.xml has no image.');
-        $this->assertContains('media/image_rId11_document.jpeg', $expectedDocumentRelationsXml, 'word/_rels/document.xml.rels missed "media/image5_document.jpeg"');
-        */
     }
 }

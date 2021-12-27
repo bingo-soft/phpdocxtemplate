@@ -228,7 +228,8 @@ class DocxDocument
     private function getVariablesForPart(string $documentPartXML): array
     {
         $matches = array();
-        preg_match_all('/\$\{(.*?)}/i', $documentPartXML, $matches);
+        //preg_match_all('/\$\{(.*?)}/i', $documentPartXML, $matches);
+        preg_match_all('/\{\{(.*?)\}\}/i', $documentPartXML, $matches);
 
         return $matches[1];
     }
@@ -422,7 +423,8 @@ class DocxDocument
 
             // add image to document
             $imgName = 'image_' . $rid . '_' . pathinfo($partFileName, PATHINFO_FILENAME) . '.' . $imgExt;
-            $this->zipClass->pclzipAddFile($imgPath, 'word/media/' . $imgName);
+            $this->zipClass->addFile($imgPath, 'word/media/' . $imgName);
+
             $this->tempDocumentNewImages[$imgPath] = $imgName;
 
             // setup type for image
