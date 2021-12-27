@@ -423,6 +423,7 @@ class DocxDocument
 
             // add image to document
             $imgName = 'image_' . $rid . '_' . pathinfo($partFileName, PATHINFO_FILENAME) . '.' . $imgExt;
+            //$this->zipClass->pclzipAddFile($imgPath, 'word/media/' . $imgName);
             $this->zipClass->addFile($imgPath, 'word/media/' . $imgName);
 
             $this->tempDocumentNewImages[$imgPath] = $imgName;
