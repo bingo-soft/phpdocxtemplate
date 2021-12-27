@@ -19,6 +19,9 @@ class DocxDocument
     private $path;
     private $tmpDir;
     private $document;
+    private $zipClass;
+    private $tempDocumentMainPart;
+    private $tempDocumentRelations = [];
 
     /**
      * Construct an instance of Document
@@ -32,6 +35,7 @@ class DocxDocument
         if (file_exists($path)) {
             $this->path = $path;
             $this->tmpDir = sys_get_temp_dir() . "/" . uniqid("", true) . date("His");
+            $this->zipClass = new ZipArchive();
             $this->extract();
         } else {
             throw new Exception("The template " . $path . " was not found!");
@@ -49,12 +53,90 @@ class DocxDocument
 
         mkdir($this->tmpDir);
 
-        $zip = new ZipArchive();
-        $zip->open($this->path);
-        $zip->extractTo($this->tmpDir);
-        $zip->close();
+        $this->zipClass->open($this->path);
+        $this->zipClass->extractTo($this->tmpDir);
+        $this->tempDocumentMainPart = $this->readPartWithRels($this->getMainPartName());
+        $this->zipClass->close();
 
         $this->document = file_get_contents($this->tmpDir . "/word/document.xml");
+    }
+
+    /**
+     * Get document main part
+     *
+     * @return string
+     */
+    public function getDocumentMainPart(): string
+    {
+        return $this->tempDocumentMainPart;
+    }
+
+    /**
+     * Get the name of main part document (method from PhpOffice\PhpWord)
+     *
+     * @return string
+     */
+    private function getMainPartName(): string
+    {
+        $contentTypes = $this->zipClass->getFromName('[Content_Types].xml');
+
+        $pattern = '~PartName="\/(word\/document.*?\.xml)" ' .
+                   'ContentType="application\/vnd\.openxmlformats-officedocument' .
+                   '\.wordprocessingml\.document\.main\+xml"~';
+
+        $matches = [];
+        preg_match($pattern, $contentTypes, $matches);
+
+        return array_key_exists(1, $matches) ? $matches[1] : 'word/document.xml';
+    }
+
+    /**
+     * Read document part (method from PhpOffice\PhpWord)
+     *
+     * @param string $fileName
+     *
+     * @return string
+     */
+    private function readPartWithRels(string $fileName): string
+    {
+        $relsFileName = $this->getRelationsName($fileName);
+        $partRelations = $this->zipClass->getFromName($relsFileName);
+        if ($partRelations !== false) {
+            $this->tempDocumentRelations[$fileName] = $partRelations;
+        }
+
+        return $this->fixBrokenMacros($this->zipClass->getFromName($fileName));
+    }
+
+    /**
+     * Get the name of the relations file for document part (method from PhpOffice\PhpWord)
+     *
+     * @param string $documentPartName
+     *
+     * @return string
+     */
+    private function getRelationsName(string $documentPartName): string
+    {
+        return 'word/_rels/' . pathinfo($documentPartName, PATHINFO_BASENAME) . '.rels';
+    }
+
+
+    /**
+     * Finds parts of broken macros and sticks them together (method from PhpOffice\PhpWord)
+     *
+     * @param string $documentPart
+     *
+     * @return string
+     */
+    private function fixBrokenMacros(string $documentPart): string
+    {
+        return preg_replace_callback(
+            '/\$(?:\{|[^{$]*\>\{)[^}$]*\}/U',
+            function ($match) {
+                return strip_tags($match[0]);
+            },
+            $documentPart
+        );
     }
 
     /**

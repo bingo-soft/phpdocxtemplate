@@ -470,6 +470,7 @@ class PhpDocxTemplateTest extends TestCase
                 "c" => "c2"
             ]
         ]]);
+
         $this->assertEquals(
             $reporter->getXml(),
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" .
@@ -589,6 +590,119 @@ class PhpDocxTemplateTest extends TestCase
             "i=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\"/><w:color w:val=\"auto\"/>" .
             "<w:spacing w:val=\"0\"/><w:position w:val=\"0\"/><w:sz w:val=\"22\"/><w:shd w:fill=\"auto\" w:val=\"" .
             "clear\"/></w:rPr></w:pPr></w:p></w:body></w:document>\n"
+        );
+
+        $this->assertEquals(
+            $reporter->getDocx()->getDocumentMainPart(),
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><w:document xmlns:w=\"http://schemas.op" .
+            "enxmlformats.org/wordprocessingml/2006/main\"><w:body><w:tbl><w:tblPr /><w:tblGrid><w:gridCol w:w=\"" .
+            "1526\" /><w:gridCol w:w=\"1843\" /><w:gridCol w:w=\"5919\" /></w:tblGrid><w:tr><w:trPr><w:trHeight w" .
+            ":val=\"200\" w:hRule=\"auto\" /><w:jc w:val=\"left\" /></w:trPr><w:tc><w:tcPr><w:tcW w:w=\"1526\" w:" .
+            "type=\"dxa\" /><w:tcBorders><w:top w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:left w:val=\"" .
+            "single\" w:color=\"000000\" w:sz=\"4\" /><w:bottom w:val=\"single\" w:color=\"000000\" w:sz=\"4\" />" .
+            "<w:right w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /></w:tcBorders><w:shd w:color=\"000000\" w:" .
+            "fill=\"ffffff\" w:val=\"clear\" /><w:tcMar><w:left w:w=\"108\" w:type=\"dxa\" /><w:right w:w=\"108\"" .
+            " w:type=\"dxa\" /></w:tcMar><w:vAlign w:val=\"top\" /></w:tcPr><w:p><w:pPr><w:spacing w:before=\"0\"" .
+            " w:after=\"0\" w:line=\"240\" /><w:ind w:right=\"0\" w:left=\"0\" w:firstLine=\"0\" /><w:jc w:val=\"" .
+            "left\" /><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Cali" .
+            "bri\" /><w:color w:val=\"auto\" /><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"2" .
+            "2\" /><w:shd w:fill=\"auto\" w:val=\"clear\" /></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii=\"Calib" .
+            "ri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\" /><w:color w:val=\"auto\" /><w:spac" .
+            "ing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"auto\" w:val=\"clea" .
+            "r\" /></w:rPr><w:t xml:space=\"preserve\">A</w:t></w:r></w:p></w:tc><w:tc><w:tcPr><w:tcW w:w=\"1843\"" .
+            " w:type=\"dxa\" /><w:tcBorders><w:top w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:left w:va" .
+            "l=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:bottom w:val=\"single\" w:color=\"000000\" w:sz=\"4\"" .
+            " /><w:right w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /></w:tcBorders><w:shd w:color=\"000000\"" .
+            " w:fill=\"ffffff\" w:val=\"clear\" /><w:tcMar><w:left w:w=\"108\" w:type=\"dxa\" /><w:right w:w=\"1" .
+            "08\" w:type=\"dxa\" /></w:tcMar><w:vAlign w:val=\"top\" /></w:tcPr><w:p><w:pPr><w:spacing w:before=\"" .
+            "0\" w:after=\"0\" w:line=\"240\" /><w:ind w:right=\"0\" w:left=\"0\" w:firstLine=\"0\" /><w:jc w:va" .
+            "l=\"left\" /><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"" .
+            "Calibri\" /><w:color w:val=\"auto\" /><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val" .
+            "=\"22\" /><w:shd w:fill=\"auto\" w:val=\"clear\" /></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii=\"C" .
+            "alibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\" /><w:color w:val=\"auto\" /><w:" .
+            "spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"auto\" w:val=\"" .
+            "clear\" /></w:rPr><w:t xml:space=\"preserve\">B</w:t></w:r></w:p></w:tc><w:tc><w:tcPr><w:tcW w:w=\"5" .
+            "919\" w:type=\"dxa\" /><w:tcBorders><w:top w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:left " .
+            "w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:bottom w:val=\"single\" w:color=\"000000\" w:sz=" .
+            "\"4\" /><w:right w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /></w:tcBorders><w:shd w:color=\"000" .
+            "000\" w:fill=\"ffffff\" w:val=\"clear\" /><w:tcMar><w:left w:w=\"108\" w:type=\"dxa\" /><w:right w:w" .
+            "=\"108\" w:type=\"dxa\" /></w:tcMar><w:vAlign w:val=\"top\" /></w:tcPr><w:p><w:pPr><w:spacing w:befo" .
+            "re=\"0\" w:after=\"0\" w:line=\"240\" /><w:ind w:right=\"0\" w:left=\"0\" w:firstLine=\"0\" /><w:jc " .
+            "w:val=\"left\" /><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsi" .
+            "a=\"Calibri\" /><w:color w:val=\"auto\" /><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w" .
+            ":val=\"22\" /><w:shd w:fill=\"auto\" w:val=\"clear\" /></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii" .
+            "=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\" /><w:color w:val=\"auto\" /" .
+            "><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"auto\" w:va" .
+            "l=\"clear\" /></w:rPr><w:t xml:space=\"preserve\">C</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:trPr><w:" .
+            "trHeight w:val=\"1\" w:hRule=\"atLeast\" /><w:jc w:val=\"left\" /></w:trPr><w:tc><w:tcPr><w:tcW w:w=" .
+            "\"9288\" w:type=\"dxa\" /><w:gridSpan w:val=\"3\" /><w:tcBorders><w:top w:val=\"single\" w:color=\"0" .
+            "00000\" w:sz=\"4\" /><w:left w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:bottom w:val=\"sing" .
+            "le\" w:color=\"000000\" w:sz=\"4\" /><w:right w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /></w:t" .
+            "cBorders><w:shd w:color=\"000000\" w:fill=\"ffffff\" w:val=\"clear\" /><w:tcMar><w:left w:w=\"108\" " .
+            "w:type=\"dxa\" /><w:right w:w=\"108\" w:type=\"dxa\" /></w:tcMar><w:vAlign w:val=\"top\" /></w:tcPr>" .
+            "<w:p><w:pPr><w:spacing w:before=\"0\" w:after=\"0\" w:line=\"240\" /><w:ind w:right=\"0\" w:left=\"0" .
+            "\" w:firstLine=\"0\" /><w:jc w:val=\"left\" /><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri" .
+            "\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\" /><w:color w:val=\"auto\" /><w:spacing w:val=\"0\" /><w:p" .
+            "osition w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"auto\" w:val=\"clear\" /></w:rPr></w:pPr>" .
+            "<w:r><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\"" .
+            " /><w:color w:val=\"auto\" /><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"22\" " .
+            "/><w:shd w:fill=\"auto\" w:val=\"clear\" /></w:rPr><w:t xml:space=\"preserve\">{%tr for record in re" .
+            "cords %}</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:trPr><w:trHeight w:val=\"1\" w:hRule=\"atLeast\" />" .
+            "<w:jc w:val=\"left\" /></w:trPr><w:tc><w:tcPr><w:tcW w:w=\"1526\" w:type=\"dxa\" /><w:tcBorders><w:t" .
+            "op w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:left w:val=\"single\" w:color=\"000000\" w:sz" .
+            "=\"4\" /><w:bottom w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:right w:val=\"single\" w:colo" .
+            "r=\"000000\" w:sz=\"4\" /></w:tcBorders><w:shd w:color=\"000000\" w:fill=\"ffffff\" w:val=\"clear\" " .
+            "/><w:tcMar><w:left w:w=\"108\" w:type=\"dxa\" /><w:right w:w=\"108\" w:type=\"dxa\" /></w:tcMar><w:v" .
+            "Align w:val=\"top\" /></w:tcPr><w:p><w:pPr><w:spacing w:before=\"0\" w:after=\"0\" w:line=\"240\" />" .
+            "<w:ind w:right=\"0\" w:left=\"0\" w:firstLine=\"0\" /><w:jc w:val=\"left\" /><w:rPr><w:rFonts w:asci" .
+            "i=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\" /><w:color w:val=\"auto\" " .
+            "/><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"auto\" w:v" .
+            "al=\"clear\" /></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"" .
+            "Calibri\" w:eastAsia=\"Calibri\" /><w:color w:val=\"auto\" /><w:spacing w:val=\"0\" /><w:position w:" .
+            "val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"auto\" w:val=\"clear\" /></w:rPr><w:t xml:space=\"p" .
+            "reserve\">{{ record.a }}</w:t></w:r></w:p></w:tc><w:tc><w:tcPr><w:tcW w:w=\"1843\" w:type=\"dxa\" />" .
+            "<w:tcBorders><w:top w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:left w:val=\"single\" w:colo" .
+            "r=\"000000\" w:sz=\"4\" /><w:bottom w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:right w:val=" .
+            "\"single\" w:color=\"000000\" w:sz=\"4\" /></w:tcBorders><w:shd w:color=\"000000\" w:fill=\"ffffff\"" .
+            " w:val=\"clear\" /><w:tcMar><w:left w:w=\"108\" w:type=\"dxa\" /><w:right w:w=\"108\" w:type=\"dxa\"" .
+            " /></w:tcMar><w:vAlign w:val=\"top\" /></w:tcPr><w:p><w:pPr><w:spacing w:before=\"0\" w:after=\"0\" " .
+            "w:line=\"240\" /><w:ind w:right=\"0\" w:left=\"0\" w:firstLine=\"0\" /><w:jc w:val=\"left\" /><w:rPr" .
+            "><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\" /><w:colo" .
+            "r w:val=\"auto\" /><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:" .
+            "fill=\"auto\" w:val=\"clear\" /></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"" .
+            "Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\" /><w:color w:val=\"auto\" /><w:spacing w:val=\"0\"" .
+            " /><w:position w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"auto\" w:val=\"clear\" /></w:rPr><" .
+            "w:t xml:space=\"preserve\">{{ record.b }}</w:t></w:r></w:p></w:tc><w:tc><w:tcPr><w:tcW w:w=\"5919\" " .
+            "w:type=\"dxa\" /><w:tcBorders><w:top w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:left w:val=" .
+            "\"single\" w:color=\"000000\" w:sz=\"4\" /><w:bottom w:val=\"single\" w:color=\"000000\" w:sz=\"4\" " .
+            "/><w:right w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /></w:tcBorders><w:shd w:color=\"000000\" " .
+            "w:fill=\"ffffff\" w:val=\"clear\" /><w:tcMar><w:left w:w=\"108\" w:type=\"dxa\" /><w:right w:w=\"108" .
+            "\" w:type=\"dxa\" /></w:tcMar><w:vAlign w:val=\"top\" /></w:tcPr><w:p><w:pPr><w:spacing w:before=\"0" .
+            "\" w:after=\"0\" w:line=\"240\" /><w:ind w:right=\"0\" w:left=\"0\" w:firstLine=\"0\" /><w:jc w:val=" .
+            "\"left\" /><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Ca" .
+            "libri\" /><w:color w:val=\"auto\" /><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"" .
+            "22\" /><w:shd w:fill=\"auto\" w:val=\"clear\" /></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii=\"Cal" .
+            "ibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\" /><w:color w:val=\"auto\" /><w:sp" .
+            "acing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"auto\" w:val=\"cl" .
+            "ear\" /></w:rPr><w:t xml:space=\"preserve\">{{ record.c }}</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:t" .
+            "rPr><w:trHeight w:val=\"1\" w:hRule=\"atLeast\" /><w:jc w:val=\"left\" /></w:trPr><w:tc><w:tcPr><w:t" .
+            "cW w:w=\"9288\" w:type=\"dxa\" /><w:gridSpan w:val=\"3\" /><w:tcBorders><w:top w:val=\"single\" w:co" .
+            "lor=\"000000\" w:sz=\"4\" /><w:left w:val=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:bottom w:val" .
+            "=\"single\" w:color=\"000000\" w:sz=\"4\" /><w:right w:val=\"single\" w:color=\"000000\" w:sz=\"4\" " .
+            "/></w:tcBorders><w:shd w:color=\"000000\" w:fill=\"ffffff\" w:val=\"clear\" /><w:tcMar><w:left w:w=\"" .
+            "108\" w:type=\"dxa\" /><w:right w:w=\"108\" w:type=\"dxa\" /></w:tcMar><w:vAlign w:val=\"top\" /></" .
+            "w:tcPr><w:p><w:pPr><w:spacing w:before=\"0\" w:after=\"0\" w:line=\"240\" /><w:ind w:right=\"0\" w:l" .
+            "eft=\"0\" w:firstLine=\"0\" /><w:jc w:val=\"left\" /><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"" .
+            "Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\" /><w:color w:val=\"auto\" /><w:spacing w:val=\"0\"" .
+            " /><w:position w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"auto\" w:val=\"clear\" /></w:rPr><" .
+            "/w:pPr><w:r><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"C" .
+            "alibri\" /><w:color w:val=\"auto\" /><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=" .
+            "\"22\" /><w:shd w:fill=\"auto\" w:val=\"clear\" /></w:rPr><w:t xml:space=\"preserve\">{%tr endfor %}" .
+            "</w:t></w:r></w:p></w:tc></w:tr></w:tbl><w:p><w:pPr><w:spacing w:before=\"0\" w:after=\"200\" w:line" .
+            "=\"276\" /><w:ind w:right=\"0\" w:left=\"0\" w:firstLine=\"0\" /><w:jc w:val=\"left\" /><w:rPr><w:rF" .
+            "onts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\" w:cs=\"Calibri\" w:eastAsia=\"Calibri\" /><w:color w:va" .
+            "l=\"auto\" /><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"" .
+            "auto\" w:val=\"clear\" /></w:rPr></w:pPr></w:p></w:body></w:document>"
         );
     }
 }
