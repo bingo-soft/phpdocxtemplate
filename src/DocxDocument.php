@@ -21,7 +21,11 @@ class DocxDocument
     private $document;
     private $zipClass;
     private $tempDocumentMainPart;
+    private $tempDocumentHeaders = [];
+    private $tempDocumentFooters = [];
     private $tempDocumentRelations = [];
+    private $tempDocumentContentTypes = '';
+    private $tempDocumentNewImages = [];
 
     /**
      * Construct an instance of Document
@@ -55,7 +59,22 @@ class DocxDocument
 
         $this->zipClass->open($this->path);
         $this->zipClass->extractTo($this->tmpDir);
+
+        $index = 1;
+        while (false !== $this->zipClass->locateName($this->getHeaderName($index))) {
+            $this->tempDocumentHeaders[$index] = $this->readPartWithRels($this->getHeaderName($index));
+            $index += 1;
+        }
+        $index = 1;
+        while (false !== $this->zipClass->locateName($this->getFooterName($index))) {
+            $this->tempDocumentFooters[$index] = $this->readPartWithRels($this->getFooterName($index));
+            $index += 1;
+        }
+
         $this->tempDocumentMainPart = $this->readPartWithRels($this->getMainPartName());
+
+        $this->tempDocumentContentTypes = $this->zipClass->getFromName($this->getDocumentContentTypesName());
+
         $this->zipClass->close();
 
         $this->document = file_get_contents($this->tmpDir . "/word/document.xml");
@@ -91,6 +110,14 @@ class DocxDocument
     }
 
     /**
+     * @return string
+     */
+    private function getDocumentContentTypesName(): string
+    {
+        return '[Content_Types].xml';
+    }
+
+    /**
      * Read document part (method from PhpOffice\PhpWord)
      *
      * @param string $fileName
@@ -120,6 +147,19 @@ class DocxDocument
         return 'word/_rels/' . pathinfo($documentPartName, PATHINFO_BASENAME) . '.rels';
     }
 
+    private function getNextRelationsIndex(string $documentPartName): int
+    {
+        if (isset($this->tempDocumentRelations[$documentPartName])) {
+            $candidate = substr_count($this->tempDocumentRelations[$documentPartName], '<Relationship');
+            while (strpos($this->tempDocumentRelations[$documentPartName], 'Id="rId' . $candidate . '"') !== false) {
+                $candidate++;
+            }
+
+            return $candidate;
+        }
+
+        return 1;
+    }
 
     /**
      * Finds parts of broken macros and sticks them together (method from PhpOffice\PhpWord)
@@ -138,6 +178,346 @@ class DocxDocument
             $documentPart
         );
     }
+
+    /**
+     * @param string $macro
+     *
+     * @return string
+     */
+    protected static function ensureMacroCompleted(string $macro): string
+    {
+        if (substr($macro, 0, 2) !== '${' && substr($macro, -1) !== '}') {
+            $macro = '${' . $macro . '}';
+        }
+        return $macro;
+    }
+
+    /**
+     * Get the name of the header file for $index.
+     *
+     * @param int $index
+     *
+     * @return string
+     */
+    private function getHeaderName(int $index): string
+    {
+        return sprintf('word/header%d.xml', $index);
+    }
+
+    /**
+     * Get the name of the footer file for $index.
+     *
+     * @param int $index
+     *
+     * @return string
+     */
+    private function getFooterName(int $index): string
+    {
+        return sprintf('word/footer%d.xml', $index);
+    }
+
+    /**
+     * Find all variables in $documentPartXML.
+     *
+     * @param string $documentPartXML
+     *
+     * @return string[]
+     */
+    private function getVariablesForPart(string $documentPartXML): array
+    {
+        $matches = array();
+        preg_match_all('/\$\{(.*?)}/i', $documentPartXML, $matches);
+
+        return $matches[1];
+    }
+
+    private function getImageArgs(string $varNameWithArgs): array
+    {
+        $varElements = explode(':', $varNameWithArgs);
+        array_shift($varElements); // first element is name of variable => remove it
+
+        $varInlineArgs = array();
+        // size format documentation: https://msdn.microsoft.com/en-us/library/documentformat.openxml.vml.shape%28v=office.14%29.aspx?f=255&MSPPError=-2147217396
+        foreach ($varElements as $argIdx => $varArg) {
+            if (strpos($varArg, '=')) { // arg=value
+                list($argName, $argValue) = explode('=', $varArg, 2);
+                $argName = strtolower($argName);
+                if ($argName == 'size') {
+                    list($varInlineArgs['width'], $varInlineArgs['height']) = explode('x', $argValue, 2);
+                } else {
+                    $varInlineArgs[strtolower($argName)] = $argValue;
+                }
+            } elseif (preg_match('/^([0-9]*[a-z%]{0,2}|auto)x([0-9]*[a-z%]{0,2}|auto)$/i', $varArg)) { // 60x40
+                list($varInlineArgs['width'], $varInlineArgs['height']) = explode('x', $varArg, 2);
+            } else { // :60:40:f
+                switch ($argIdx) {
+                    case 0:
+                        $varInlineArgs['width'] = $varArg;
+                        break;
+                    case 1:
+                        $varInlineArgs['height'] = $varArg;
+                        break;
+                    case 2:
+                        $varInlineArgs['ratio'] = $varArg;
+                        break;
+                }
+            }
+        }
+
+        return $varInlineArgs;
+    }
+
+    /**
+     * @param mixed $replaceImage
+     * @param array $varInlineArgs
+     *
+     * @return array
+     */
+    private function prepareImageAttrs($replaceImage, array $varInlineArgs): array
+    {
+        // get image path and size
+        $width = null;
+        $height = null;
+        $ratio = null;
+
+        // a closure can be passed as replacement value which after resolving, can contain the replacement info for the image
+        // use case: only when a image if found, the replacement tags can be generated
+        if (is_callable($replaceImage)) {
+            $replaceImage = $replaceImage();
+        }
+
+        if (is_array($replaceImage) && isset($replaceImage['path'])) {
+            $imgPath = $replaceImage['path'];
+            if (isset($replaceImage['width'])) {
+                $width = $replaceImage['width'];
+            }
+            if (isset($replaceImage['height'])) {
+                $height = $replaceImage['height'];
+            }
+            if (isset($replaceImage['ratio'])) {
+                $ratio = $replaceImage['ratio'];
+            }
+        } else {
+            $imgPath = $replaceImage;
+        }
+
+        $width = $this->chooseImageDimension($width, isset($varInlineArgs['width']) ? $varInlineArgs['width'] : null, 115);
+        $height = $this->chooseImageDimension($height, isset($varInlineArgs['height']) ? $varInlineArgs['height'] : null, 70);
+
+        $imageData = @getimagesize($imgPath);
+        if (!is_array($imageData)) {
+            throw new Exception(sprintf('Invalid image: %s', $imgPath));
+        }
+        list($actualWidth, $actualHeight, $imageType) = $imageData;
+
+        // fix aspect ratio (by default)
+        if (is_null($ratio) && isset($varInlineArgs['ratio'])) {
+            $ratio = $varInlineArgs['ratio'];
+        }
+        if (is_null($ratio) || !in_array(strtolower($ratio), array('', '-', 'f', 'false'))) {
+            $this->fixImageWidthHeightRatio($width, $height, $actualWidth, $actualHeight);
+        }
+
+        $imageAttrs = array(
+            'src'    => $imgPath,
+            'mime'   => image_type_to_mime_type($imageType),
+            'width'  => $width,
+            'height' => $height,
+        );
+
+        return $imageAttrs;
+    }
+
+    /**
+     * @param mixed $width
+     * @param mixed $height
+     * @param int $actualWidth
+     * @param int $actualHeight
+     */
+    private function fixImageWidthHeightRatio(&$width, &$height, int $actualWidth, int $actualHeight): void
+    {
+        $imageRatio = $actualWidth / $actualHeight;
+
+        if (($width === '') && ($height === '')) { // defined size are empty
+            $width = $actualWidth . 'px';
+            $height = $actualHeight . 'px';
+        } elseif ($width === '') { // defined width is empty
+            $heightFloat = (float) $height;
+            $widthFloat = $heightFloat * $imageRatio;
+            $matches = array();
+            preg_match("/\d([a-z%]+)$/", $height, $matches);
+            $width = $widthFloat . $matches[1];
+        } elseif ($height === '') { // defined height is empty
+            $widthFloat = (float) $width;
+            $heightFloat = $widthFloat / $imageRatio;
+            $matches = array();
+            preg_match("/\d([a-z%]+)$/", $width, $matches);
+            $height = $heightFloat . $matches[1];
+        } else { // we have defined size, but we need also check it aspect ratio
+            $widthMatches = array();
+            preg_match("/\d([a-z%]+)$/", $width, $widthMatches);
+            $heightMatches = array();
+            preg_match("/\d([a-z%]+)$/", $height, $heightMatches);
+            // try to fix only if dimensions are same
+            if ($widthMatches[1] == $heightMatches[1]) {
+                $dimention = $widthMatches[1];
+                $widthFloat = (float) $width;
+                $heightFloat = (float) $height;
+                $definedRatio = $widthFloat / $heightFloat;
+
+                if ($imageRatio > $definedRatio) { // image wider than defined box
+                    $height = ($widthFloat / $imageRatio) . $dimention;
+                } elseif ($imageRatio < $definedRatio) { // image higher than defined box
+                    $width = ($heightFloat * $imageRatio) . $dimention;
+                }
+            }
+        }
+    }
+
+    private function chooseImageDimension(?int $baseValue, ?int $inlineValue, int $defaultValue): string
+    {
+        $value = $baseValue;
+        if (is_null($value) && isset($inlineValue)) {
+            $value = $inlineValue;
+        }
+        if (!preg_match('/^([0-9]*(cm|mm|in|pt|pc|px|%|em|ex|)|auto)$/i', $value)) {
+            $value = null;
+        }
+        if (is_null($value)) {
+            $value = $defaultValue;
+        }
+        if (is_numeric($value)) {
+            $value .= 'px';
+        }
+
+        return $value;
+    }
+
+    private function addImageToRelations(string $partFileName, string $rid, string $imgPath, string $imageMimeType): void
+    {
+        // define templates
+        $typeTpl = '<Override PartName="/word/media/{IMG}" ContentType="image/{EXT}"/>';
+        $relationTpl = '<Relationship Id="{RID}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/{IMG}"/>';
+        $newRelationsTpl = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n" . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+        $newRelationsTypeTpl = '<Override PartName="/{RELS}" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>';
+        $extTransform = array(
+            'image/jpeg' => 'jpeg',
+            'image/png'  => 'png',
+            'image/bmp'  => 'bmp',
+            'image/gif'  => 'gif',
+        );
+
+        // get image embed name
+        if (isset($this->tempDocumentNewImages[$imgPath])) {
+            $imgName = $this->tempDocumentNewImages[$imgPath];
+        } else {
+            // transform extension
+            if (isset($extTransform[$imageMimeType])) {
+                $imgExt = $extTransform[$imageMimeType];
+            } else {
+                throw new Exception("Unsupported image type $imageMimeType");
+            }
+
+            // add image to document
+            $imgName = 'image_' . $rid . '_' . pathinfo($partFileName, PATHINFO_FILENAME) . '.' . $imgExt;
+            $this->zipClass->pclzipAddFile($imgPath, 'word/media/' . $imgName);
+            $this->tempDocumentNewImages[$imgPath] = $imgName;
+
+            // setup type for image
+            $xmlImageType = str_replace(array('{IMG}', '{EXT}'), array($imgName, $imgExt), $typeTpl);
+            $this->tempDocumentContentTypes = str_replace('</Types>', $xmlImageType, $this->tempDocumentContentTypes) . '</Types>';
+        }
+
+        $xmlImageRelation = str_replace(array('{RID}', '{IMG}'), array($rid, $imgName), $relationTpl);
+
+        if (!isset($this->tempDocumentRelations[$partFileName])) {
+            // create new relations file
+            $this->tempDocumentRelations[$partFileName] = $newRelationsTpl;
+            // and add it to content types
+            $xmlRelationsType = str_replace('{RELS}', $this->getRelationsName($partFileName), $newRelationsTypeTpl);
+            $this->tempDocumentContentTypes = str_replace('</Types>', $xmlRelationsType, $this->tempDocumentContentTypes) . '</Types>';
+        }
+
+        // add image to relations
+        $this->tempDocumentRelations[$partFileName] = str_replace('</Relationships>', $xmlImageRelation, $this->tempDocumentRelations[$partFileName]) . '</Relationships>';
+    }
+
+    /**
+     * @param mixed $search
+     * @param mixed $replace Path to image, or array("path" => xx, "width" => yy, "height" => zz)
+     * @param int $limit
+     */
+    public function setImageValue($search, $replace, int $limit = self::MAXIMUM_REPLACEMENTS_DEFAULT): void
+    {
+        // prepare $search_replace
+        if (!is_array($search)) {
+            $search = array($search);
+        }
+
+        $replacesList = array();
+        if (!is_array($replace) || isset($replace['path'])) {
+            $replacesList[] = $replace;
+        } else {
+            $replacesList = array_values($replace);
+        }
+
+        $searchReplace = array();
+        foreach ($search as $searchIdx => $searchString) {
+            $searchReplace[$searchString] = isset($replacesList[$searchIdx]) ? $replacesList[$searchIdx] : $replacesList[0];
+        }
+
+        // collect document parts
+        $searchParts = array(
+            $this->getMainPartName() => &$this->tempDocumentMainPart,
+        );
+        foreach (array_keys($this->tempDocumentHeaders) as $headerIndex) {
+            $searchParts[$this->getHeaderName($headerIndex)] = &$this->tempDocumentHeaders[$headerIndex];
+        }
+        foreach (array_keys($this->tempDocumentFooters) as $headerIndex) {
+            $searchParts[$this->getFooterName($headerIndex)] = &$this->tempDocumentFooters[$headerIndex];
+        }
+
+        // define templates
+        // result can be verified via "Open XML SDK 2.5 Productivity Tool" (http://www.microsoft.com/en-us/download/details.aspx?id=30425)
+        $imgTpl = '<w:pict><v:shape type="#_x0000_t75" style="width:{WIDTH};height:{HEIGHT}" stroked="f"><v:imagedata r:id="{RID}" o:title=""/></v:shape></w:pict>';
+
+        foreach ($searchParts as $partFileName => &$partContent) {
+            $partVariables = $this->getVariablesForPart($partContent);
+
+            foreach ($searchReplace as $searchString => $replaceImage) {
+                $varsToReplace = array_filter($partVariables, function ($partVar) use ($searchString) {
+                    return ($partVar == $searchString) || preg_match('/^' . preg_quote($searchString) . ':/', $partVar);
+                });
+
+                foreach ($varsToReplace as $varNameWithArgs) {
+                    $varInlineArgs = $this->getImageArgs($varNameWithArgs);
+                    $preparedImageAttrs = $this->prepareImageAttrs($replaceImage, $varInlineArgs);
+                    $imgPath = $preparedImageAttrs['src'];
+
+                    // get image index
+                    $imgIndex = $this->getNextRelationsIndex($partFileName);
+                    $rid = 'rId' . $imgIndex;
+
+                    // replace preparations
+                    $this->addImageToRelations($partFileName, $rid, $imgPath, $preparedImageAttrs['mime']);
+                    $xmlImage = str_replace(array('{RID}', '{WIDTH}', '{HEIGHT}'), array($rid, $preparedImageAttrs['width'], $preparedImageAttrs['height']), $imgTpl);
+
+                    // replace variable
+                    $varNameWithArgsFixed = self::ensureMacroCompleted($varNameWithArgs);
+                    $matches = array();
+                    if (preg_match('/(<[^<]+>)([^<]*)(' . preg_quote($varNameWithArgsFixed) . ')([^>]*)(<[^>]+>)/Uu', $partContent, $matches)) {
+                        $wholeTag = $matches[0];
+                        array_shift($matches);
+                        list($openTag, $prefix, , $postfix, $closeTag) = $matches;
+                        $replaceXml = $openTag . $prefix . $closeTag . $xmlImage . $openTag . $postfix . $closeTag;
+                        // replace on each iteration, because in one tag we can have 2+ inline variables => before proceed next variable we need to change $partContent
+                        $partContent = $this->setValueForPart($wholeTag, $replaceXml, $partContent, $limit);
+                    }
+                }
+            }
+        }
+    }
+
 
     /**
      * Get document.xml contents as DOMDocument
