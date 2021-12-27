@@ -497,6 +497,8 @@ class DocxDocument
                 }
             }
         }
+
+        $this->document = $this->tempDocumentMainPart;
     }
 
     /**
@@ -685,8 +687,6 @@ class DocxDocument
      */
     protected function savePartWithRels(ZipArchive $target, string $fileName, string $xml): void
     {
-        $this->skipFiles[] = basename($fileName);
-        $target->addFromString($fileName, $xml);
         if (isset($this->tempDocumentRelations[$fileName])) {
             $relsFileName = $this->getRelationsName($fileName);
             $this->skipFiles[] = basename($relsFileName);

@@ -17,7 +17,7 @@ class PhpDocxTemplateTest extends TestCase
     private const TEMPLATE3 = __DIR__ . "/templates/template3.docx";
     private const TEMPLATE4 = __DIR__ . "/templates/template4.docx";
     private const TEMPLATE5 = __DIR__ . "/templates/template5.docx";
-    private const TEMPLATE6 = __DIR__ . "/templates/template6.docx";
+    private const TEMPLATE7 = __DIR__ . "/templates/template7.docx";
 
     public function testXmlToString(): void
     {
@@ -710,7 +710,7 @@ class PhpDocxTemplateTest extends TestCase
 
     public function testImages(): void
     {
-        $reporter = new PhpDocxTemplate(self::TEMPLATE6);
+        $reporter = new PhpDocxTemplate(self::TEMPLATE7);
 
         $imagePath = __DIR__ . "/images/earth.jpg";
 
