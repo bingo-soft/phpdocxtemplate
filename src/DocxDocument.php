@@ -408,7 +408,6 @@ class DocxDocument
 
             // add image to document
             $imgName = 'image_' . $rid . '_' . pathinfo($partFileName, PATHINFO_FILENAME) . '.' . $imgExt;
-            //$this->zipClass->pclzipAddFile($imgPath, 'word/media/' . $imgName);
             $this->zipClass->addFile($imgPath, 'word/media/' . $imgName);
 
             $this->tempDocumentNewImages[$imgPath] = $imgName;
@@ -743,8 +742,8 @@ class DocxDocument
     {
         $rootPath = realpath($this->tmpDir);
 
-        //$this->savePartWithRels($this->getMainPartName(), $this->tempDocumentMainPart);
-        //$this->zipClass->addFromString($this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
+        $this->savePartWithRels($this->getMainPartName(), $this->tempDocumentMainPart);
+        $this->zipClass->addFromString($this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
 
         $zip = new ZipArchive();
         $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
