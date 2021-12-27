@@ -17,7 +17,6 @@ use PhpDocxTemplate\Escaper\RegExp;
  */
 class DocxDocument
 {
-    private const MAXIMUM_REPLACEMENTS_DEFAULT = -1;
     private $path;
     private $tmpDir;
     private $document;
@@ -26,6 +25,7 @@ class DocxDocument
     private $tempDocumentRelations = [];
     private $tempDocumentContentTypes = '';
     private $tempDocumentNewImages = [];
+    private $skipFiles = [];
 
     /**
      * Construct an instance of Document
@@ -63,8 +63,6 @@ class DocxDocument
         $this->tempDocumentMainPart = $this->readPartWithRels($this->getMainPartName());
 
         $this->tempDocumentContentTypes = $this->zipClass->getFromName($this->getDocumentContentTypesName());
-
-        //$this->zipClass->close();
 
         $this->document = file_get_contents($this->tmpDir . "/word/document.xml");
     }
@@ -408,8 +406,6 @@ class DocxDocument
 
             // add image to document
             $imgName = 'image_' . $rid . '_' . pathinfo($partFileName, PATHINFO_FILENAME) . '.' . $imgExt;
-            $this->zipClass->addFile($imgPath, 'word/media/' . $imgName);
-
             $this->tempDocumentNewImages[$imgPath] = $imgName;
 
             // setup type for image
@@ -429,6 +425,10 @@ class DocxDocument
 
         // add image to relations
         $this->tempDocumentRelations[$partFileName] = str_replace('</Relationships>', $xmlImageRelation, $this->tempDocumentRelations[$partFileName]) . '</Relationships>';
+
+        if (!in_array($this->getDocumentContentTypesName(), $this->skipFiles)) {
+            $this->skipFiles[] = basename($this->getDocumentContentTypesName());
+        }
     }
 
     /**
@@ -721,15 +721,18 @@ class DocxDocument
     }
 
     /**
+     * @param ZipArchive $target
      * @param string $fileName
      * @param string $xml
      */
-    protected function savePartWithRels(string $fileName, string $xml): void
+    protected function savePartWithRels(ZipArchive $target, string $fileName, string $xml): void
     {
-        $this->zipClass->addFromString($fileName, $xml);
+        $this->skipFiles[] = basename($fileName);
+        $target->addFromString($fileName, $xml);
         if (isset($this->tempDocumentRelations[$fileName])) {
             $relsFileName = $this->getRelationsName($fileName);
-            $this->zipClass->addFromString($relsFileName, $this->tempDocumentRelations[$fileName]);
+            $this->skipFiles[] = basename($relsFileName);
+            $target->addFromString($relsFileName, $this->tempDocumentRelations[$fileName]);
         }
     }
 
@@ -742,11 +745,15 @@ class DocxDocument
     {
         $rootPath = realpath($this->tmpDir);
 
-        $this->savePartWithRels($this->getMainPartName(), $this->tempDocumentMainPart);
-        $this->zipClass->addFromString($this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
-
         $zip = new ZipArchive();
         $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+        $this->savePartWithRels($zip, $this->getMainPartName(), $this->tempDocumentMainPart);
+        $zip->addFromString($this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
+
+        foreach ($this->tempDocumentNewImages as $imgPath => $imgName) {
+            $zip->addFile($imgPath, 'word/media/' . $imgName);
+        }
 
         $files = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($rootPath),
@@ -757,7 +764,9 @@ class DocxDocument
             if (!$file->isDir()) {
                 $filePath = $file->getRealPath();
                 $relativePath = substr($filePath, strlen($rootPath) + 1);
-                $zip->addFile($filePath, $relativePath);
+                if (!in_array(basename($filePath), $this->skipFiles)) {
+                    $zip->addFile($filePath, $relativePath);
+                }
             }
         }
 

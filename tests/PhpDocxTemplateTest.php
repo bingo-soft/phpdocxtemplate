@@ -17,7 +17,7 @@ class PhpDocxTemplateTest extends TestCase
     private const TEMPLATE3 = __DIR__ . "/templates/template3.docx";
     private const TEMPLATE4 = __DIR__ . "/templates/template4.docx";
     private const TEMPLATE5 = __DIR__ . "/templates/template5.docx";
-    private const TEMPLATE7 = __DIR__ . "/templates/template7.docx";
+    private const TEMPLATE6 = __DIR__ . "/templates/template6.docx";
 
     public function testXmlToString(): void
     {
@@ -710,7 +710,7 @@ class PhpDocxTemplateTest extends TestCase
 
     public function testImages(): void
     {
-        $reporter = new PhpDocxTemplate(self::TEMPLATE7);
+        $reporter = new PhpDocxTemplate(self::TEMPLATE6);
 
         $imagePath = __DIR__ . "/images/earth.jpg";
 
@@ -722,7 +722,7 @@ class PhpDocxTemplateTest extends TestCase
 
         $reporter->render([]);
 
-        $docName = "./tests/templates/earth.docx";
+        $docName = "./tests/templates/image.docx";
 
         $reporter->save($docName);
 
@@ -731,7 +731,7 @@ class PhpDocxTemplateTest extends TestCase
         $expectedContentTypesXml = $expectedDocumentZip->getFromName('[Content_Types].xml');
         $expectedDocumentRelationsXml = $expectedDocumentZip->getFromName('word/_rels/document.xml.rels');
         $expectedMainPartXml = $expectedDocumentZip->getFromName('word/document.xml');
-        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId3_document.jpeg');
+        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId6_document.jpeg');
         if (false === $expectedDocumentZip->close()) {
             throw new \Exception("Could not close zip file \"{$docName}\".");
         }
