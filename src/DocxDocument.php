@@ -188,8 +188,8 @@ class DocxDocument
      */
     protected static function ensureMacroCompleted(string $macro): string
     {
-        if (substr($macro, 0, 2) !== '${' && substr($macro, -1) !== '}') {
-            $macro = '${' . $macro . '}';
+        if (substr($macro, 0, 2) !== '{{' && substr($macro, -1) !== '}}') {
+            $macro = '{{' . $macro . '}}';
         }
         return $macro;
     }
@@ -228,9 +228,7 @@ class DocxDocument
     private function getVariablesForPart(string $documentPartXML): array
     {
         $matches = array();
-        //preg_match_all('/\$\{(.*?)}/i', $documentPartXML, $matches);
         preg_match_all('/\{\{(.*?)\}\}/i', $documentPartXML, $matches);
-
         return $matches[1];
     }
 
@@ -533,7 +531,7 @@ class DocxDocument
      *
      * @return string
      */
-    protected function setValueForPart($search, $replace, string $documentPartXML, int $limit): string
+    protected function setValueForPart($search, $replace, string $documentPartXML, ?int $limit): string
     {
         // Note: we can't use the same function for both cases here, because of performance considerations.
         if (self::MAXIMUM_REPLACEMENTS_DEFAULT === $limit) {
