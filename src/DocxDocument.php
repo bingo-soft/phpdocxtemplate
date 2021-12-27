@@ -23,8 +23,6 @@ class DocxDocument
     private $document;
     private $zipClass;
     private $tempDocumentMainPart;
-    private $tempDocumentHeaders = [];
-    private $tempDocumentFooters = [];
     private $tempDocumentRelations = [];
     private $tempDocumentContentTypes = '';
     private $tempDocumentNewImages = [];
@@ -61,17 +59,6 @@ class DocxDocument
 
         $this->zipClass->open($this->path);
         $this->zipClass->extractTo($this->tmpDir);
-
-        $index = 1;
-        while (false !== $this->zipClass->locateName($this->getHeaderName($index))) {
-            $this->tempDocumentHeaders[$index] = $this->readPartWithRels($this->getHeaderName($index));
-            $index += 1;
-        }
-        $index = 1;
-        while (false !== $this->zipClass->locateName($this->getFooterName($index))) {
-            $this->tempDocumentFooters[$index] = $this->readPartWithRels($this->getFooterName($index));
-            $index += 1;
-        }
 
         $this->tempDocumentMainPart = $this->readPartWithRels($this->getMainPartName());
 
@@ -448,9 +435,8 @@ class DocxDocument
     /**
      * @param mixed $search
      * @param mixed $replace Path to image, or array("path" => xx, "width" => yy, "height" => zz)
-     * @param int $limit
      */
-    public function setImageValue($search, $replace, ?int $limit = self::MAXIMUM_REPLACEMENTS_DEFAULT): void
+    public function setImageValue($search, $replace): void
     {
         // prepare $search_replace
         if (!is_array($search)) {
@@ -473,16 +459,51 @@ class DocxDocument
         $searchParts = array(
             $this->getMainPartName() => &$this->tempDocumentMainPart,
         );
-        foreach (array_keys($this->tempDocumentHeaders) as $headerIndex) {
-            $searchParts[$this->getHeaderName($headerIndex)] = &$this->tempDocumentHeaders[$headerIndex];
-        }
-        foreach (array_keys($this->tempDocumentFooters) as $headerIndex) {
-            $searchParts[$this->getFooterName($headerIndex)] = &$this->tempDocumentFooters[$headerIndex];
-        }
-
         // define templates
         // result can be verified via "Open XML SDK 2.5 Productivity Tool" (http://www.microsoft.com/en-us/download/details.aspx?id=30425)
-        $imgTpl = '<w:pict><v:shape type="#_x0000_t75" style="width:{WIDTH};height:{HEIGHT}" stroked="f"><v:imagedata r:id="{RID}" o:title=""/></v:shape></w:pict>';
+        $imgTpl = '<w:rPr>
+                        <w:noProof/>
+                        <w:lang w:eastAsia="ru-RU"/>
+                        </w:rPr>
+                        <w:drawing>
+                            <wp:inline distT="0" distB="0" distL="0" distR="0">
+                                <wp:extent cx="{WIDTH}" cy="{HEIGHT}"/>
+                                <wp:effectExtent l="0" t="0" r="635" b="635"/>
+                                <wp:docPr id="{RID}" name=""/>
+                                <wp:cNvGraphicFramePr>
+                                    <a:graphicFrameLocks
+                                            xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
+                                            noChangeAspect="1"/>
+                                </wp:cNvGraphicFramePr>
+                                <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+                                    <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                                        <pic:pic
+                                                xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                                            <pic:nvPicPr>
+                                                <pic:cNvPr id="{RID}" name=""/>
+                                                <pic:cNvPicPr/>
+                                            </pic:nvPicPr>
+                                            <pic:blipFill>
+                                                <a:blip r:embed="rId{RID}"/>
+                                                <a:stretch>
+                                                    <a:fillRect/>
+                                                </a:stretch>
+                                            </pic:blipFill>
+                                            <pic:spPr>
+                                                <a:xfrm>
+                                                    <a:off x="0" y="0"/>
+                                                    <a:ext cx="952500" cy="952500"/>
+                                                </a:xfrm>
+                                                <a:prstGeom prst="rect">
+                                                    <a:avLst/>
+                                                </a:prstGeom>
+                                            </pic:spPr>
+                                        </pic:pic>
+                                    </a:graphicData>
+                                </a:graphic>
+                            </wp:inline>
+                        </w:drawing>';
+
 
         foreach ($searchParts as $partFileName => &$partContent) {
             $partVariables = $this->getVariablesForPart($partContent);
@@ -514,7 +535,7 @@ class DocxDocument
                         list($openTag, $prefix, , $postfix, $closeTag) = $matches;
                         $replaceXml = $openTag . $prefix . $closeTag . $xmlImage . $openTag . $postfix . $closeTag;
                         // replace on each iteration, because in one tag we can have 2+ inline variables => before proceed next variable we need to change $partContent
-                        $partContent = $this->setValueForPart($wholeTag, $replaceXml, $partContent, $limit);
+                        $partContent = $this->setValueForPart($wholeTag, $replaceXml, $partContent);
                     }
                 }
             }
@@ -527,19 +548,15 @@ class DocxDocument
      * @param mixed $search
      * @param mixed $replace
      * @param string $documentPartXML
-     * @param int $limit
      *
      * @return string
      */
-    protected function setValueForPart($search, $replace, string $documentPartXML, ?int $limit): string
+    protected function setValueForPart($search, $replace, string $documentPartXML): string
     {
         // Note: we can't use the same function for both cases here, because of performance considerations.
-        if (self::MAXIMUM_REPLACEMENTS_DEFAULT === $limit) {
-            return str_replace($search, $replace, $documentPartXML);
-        }
         $regExpEscaper = new RegExp();
 
-        return preg_replace($regExpEscaper->escape($search), $replace, $documentPartXML, $limit);
+        return preg_replace($regExpEscaper->escape($search), $replace, $documentPartXML);
     }
 
     /**
@@ -550,6 +567,7 @@ class DocxDocument
     public function getDOMDocument(): DOMDocument
     {
         $dom = new DOMDocument();
+
         $dom->loadXML($this->document);
         return $dom;
     }
@@ -704,6 +722,19 @@ class DocxDocument
     }
 
     /**
+     * @param string $fileName
+     * @param string $xml
+     */
+    protected function savePartWithRels(string $fileName, string $xml): void
+    {
+        $this->zipClass->addFromString($fileName, $xml);
+        if (isset($this->tempDocumentRelations[$fileName])) {
+            $relsFileName = $this->getRelationsName($fileName);
+            $this->zipClass->addFromString($relsFileName, $this->tempDocumentRelations[$fileName]);
+        }
+    }
+
+    /**
      * Save the document to the target path
      *
      * @param string $path - target path
@@ -711,6 +742,9 @@ class DocxDocument
     public function save(string $path): void
     {
         $rootPath = realpath($this->tmpDir);
+
+        //$this->savePartWithRels($this->getMainPartName(), $this->tempDocumentMainPart);
+        //$this->zipClass->addFromString($this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
 
         $zip = new ZipArchive();
         $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
