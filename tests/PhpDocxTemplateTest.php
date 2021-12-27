@@ -726,7 +726,7 @@ class PhpDocxTemplateTest extends TestCase
 
         $reporter->save($docName);
 
-        /*$expectedDocumentZip = new ZipArchive();
+        $expectedDocumentZip = new ZipArchive();
         $expectedDocumentZip->open($docName);
         $expectedContentTypesXml = $expectedDocumentZip->getFromName('[Content_Types].xml');
         $expectedDocumentRelationsXml = $expectedDocumentZip->getFromName('word/_rels/document.xml.rels');
@@ -736,6 +736,6 @@ class PhpDocxTemplateTest extends TestCase
             throw new \Exception("Could not close zip file \"{$docName}\".");
         }
 
-        $this->assertNotEmpty($expectedImage, 'Embed image doesn\'t found.');*/
+        $this->assertNotEmpty($expectedImage, 'Embed image doesn\'t found.');
     }
 }
