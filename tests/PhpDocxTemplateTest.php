@@ -710,7 +710,7 @@ class PhpDocxTemplateTest extends TestCase
 
     public function testImages(): void
     {
-        $reporter = new PhpDocxTemplate(self::TEMPLATE5);
+        $reporter = new PhpDocxTemplate(self::TEMPLATE6);
 
         $imagePath = __DIR__ . "/images/earth.jpg";
 
@@ -738,7 +738,7 @@ class PhpDocxTemplateTest extends TestCase
             throw new \Exception("Could not close zip file \"{$docName}\".");
         }
 
-        //$this->assertNotEmpty($expectedImage, 'Embed image doesn\'t found.');
+        $this->assertNotEmpty($expectedImage, 'Embed image doesn\'t found.');
         /*
         $this->assertContains('/word/media/image_rId11_document.jpeg', $expectedContentTypesXml, '[Content_Types].xml missed "/word/media/image5_document.jpeg"');
         $this->assertNotContains('${documentContent}', $expectedMainPartXml, 'word/document.xml has no image.');
