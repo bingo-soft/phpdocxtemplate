@@ -475,4 +475,14 @@ class PhpDocxTemplate
     {
         $this->docx->close();
     }
+
+    /**
+     * @param mixed $search
+     * @param mixed $replace Path to image, or array("path" => xx, "width" => yy, "height" => zz)
+     * @param int $limit
+     */
+    public function setImageValue($search, $replace, ?int $limit = null): void
+    {
+        $this->docx->setImageValue($search, $replace, $limit = null);
+    }
 }

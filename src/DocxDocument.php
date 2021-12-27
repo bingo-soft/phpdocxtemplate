@@ -8,6 +8,7 @@ use Exception;
 use ZipArchive;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
+use PhpDocxTemplate\Escaper\RegExp;
 
 /**
  * Class DocxDocument
@@ -16,6 +17,7 @@ use RecursiveDirectoryIterator;
  */
 class DocxDocument
 {
+    private const MAXIMUM_REPLACEMENTS_DEFAULT = -1;
     private $path;
     private $tmpDir;
     private $document;
@@ -75,7 +77,7 @@ class DocxDocument
 
         $this->tempDocumentContentTypes = $this->zipClass->getFromName($this->getDocumentContentTypesName());
 
-        $this->zipClass->close();
+        //$this->zipClass->close();
 
         $this->document = file_get_contents($this->tmpDir . "/word/document.xml");
     }
@@ -447,7 +449,7 @@ class DocxDocument
      * @param mixed $replace Path to image, or array("path" => xx, "width" => yy, "height" => zz)
      * @param int $limit
      */
-    public function setImageValue($search, $replace, int $limit = self::MAXIMUM_REPLACEMENTS_DEFAULT): void
+    public function setImageValue($search, $replace, ?int $limit = self::MAXIMUM_REPLACEMENTS_DEFAULT): void
     {
         // prepare $search_replace
         if (!is_array($search)) {
@@ -518,6 +520,26 @@ class DocxDocument
         }
     }
 
+    /**
+     * Find and replace macros in the given XML section.
+     *
+     * @param mixed $search
+     * @param mixed $replace
+     * @param string $documentPartXML
+     * @param int $limit
+     *
+     * @return string
+     */
+    protected function setValueForPart($search, $replace, string $documentPartXML, int $limit): string
+    {
+        // Note: we can't use the same function for both cases here, because of performance considerations.
+        if (self::MAXIMUM_REPLACEMENTS_DEFAULT === $limit) {
+            return str_replace($search, $replace, $documentPartXML);
+        }
+        $regExpEscaper = new RegExp();
+
+        return preg_replace($regExpEscaper->escape($search), $replace, $documentPartXML, $limit);
+    }
 
     /**
      * Get document.xml contents as DOMDocument
@@ -707,6 +729,10 @@ class DocxDocument
 
         $zip->close();
 
+        if (isset($this->zipClass)) {
+            $this->zipClass->close();
+        }
+
         $this->rrmdir($this->tmpDir);
     }
 
@@ -738,6 +764,9 @@ class DocxDocument
      */
     public function close(): void
     {
+        if (isset($this->zipClass)) {
+            $this->zipClass->close();
+        }
         $this->rrmdir($this->tmpDir);
     }
 }

@@ -8,6 +8,7 @@ use PhpDocxTemplate\PhpDocxTemplate;
 use PhpDocxTemplate\DocxDocument;
 use Twig\Loader\ArrayLoader;
 use Twig\Environment;
+use ZipArchive;
 
 class PhpDocxTemplateTest extends TestCase
 {
@@ -16,6 +17,7 @@ class PhpDocxTemplateTest extends TestCase
     private const TEMPLATE3 = __DIR__ . "/templates/template3.docx";
     private const TEMPLATE4 = __DIR__ . "/templates/template4.docx";
     private const TEMPLATE5 = __DIR__ . "/templates/template5.docx";
+    private const TEMPLATE6 = __DIR__ . "/templates/template6.docx";
 
     public function testXmlToString(): void
     {
@@ -704,5 +706,43 @@ class PhpDocxTemplateTest extends TestCase
             "l=\"auto\" /><w:spacing w:val=\"0\" /><w:position w:val=\"0\" /><w:sz w:val=\"22\" /><w:shd w:fill=\"" .
             "auto\" w:val=\"clear\" /></w:rPr></w:pPr></w:p></w:body></w:document>"
         );
+    }
+
+    public function testImages(): void
+    {
+        $reporter = new PhpDocxTemplate(self::TEMPLATE5);
+
+        $imagePath = __DIR__ . "/images/earth.jpg";
+
+        $variablesReplace = array(
+            'earthImage' => array('path' => $imagePath, 'width' => 500, 'height' => 500)
+        );
+
+        $reporter->setImageValue(array_keys($variablesReplace), $variablesReplace);
+
+        $reporter->render([]);
+
+        $docName = "./tests/templates/earth.docx";
+
+        $reporter->save($docName);
+
+        $expectedDocumentZip = new ZipArchive();
+        $expectedDocumentZip->open($docName);
+        $expectedContentTypesXml = $expectedDocumentZip->getFromName('[Content_Types].xml');
+        $expectedDocumentRelationsXml = $expectedDocumentZip->getFromName('word/_rels/document.xml.rels');
+        $expectedHeaderRelationsXml = $expectedDocumentZip->getFromName('word/_rels/header1.xml.rels');
+        $expectedFooterRelationsXml = $expectedDocumentZip->getFromName('word/_rels/footer1.xml.rels');
+        $expectedMainPartXml = $expectedDocumentZip->getFromName('word/document.xml');
+        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId11_document.jpeg');
+        if (false === $expectedDocumentZip->close()) {
+            throw new \Exception("Could not close zip file \"{$docName}\".");
+        }
+
+        //$this->assertNotEmpty($expectedImage, 'Embed image doesn\'t found.');
+        /*
+        $this->assertContains('/word/media/image_rId11_document.jpeg', $expectedContentTypesXml, '[Content_Types].xml missed "/word/media/image5_document.jpeg"');
+        $this->assertNotContains('${documentContent}', $expectedMainPartXml, 'word/document.xml has no image.');
+        $this->assertContains('media/image_rId11_document.jpeg', $expectedDocumentRelationsXml, 'word/_rels/document.xml.rels missed "media/image5_document.jpeg"');
+        */
     }
 }
