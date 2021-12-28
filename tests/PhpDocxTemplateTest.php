@@ -17,7 +17,7 @@ class PhpDocxTemplateTest extends TestCase
     private const TEMPLATE3 = __DIR__ . "/templates/template3.docx";
     private const TEMPLATE4 = __DIR__ . "/templates/template4.docx";
     private const TEMPLATE5 = __DIR__ . "/templates/template5.docx";
-    private const TEMPLATE7 = __DIR__ . "/templates/template7.docx";
+    private const TEMPLATE8 = __DIR__ . "/templates/template8.docx";
 
     public function testXmlToString(): void
     {
@@ -710,17 +710,28 @@ class PhpDocxTemplateTest extends TestCase
 
     public function testImages(): void
     {
-        $reporter = new PhpDocxTemplate(self::TEMPLATE7);
+        $reporter = new PhpDocxTemplate(self::TEMPLATE8);
 
         $imagePath = __DIR__ . "/images/earth.jpg";
 
         $variablesReplace = array(
-            'image' => array('path' => $imagePath, 'width' => 400, 'height' => 400)
+            'image' => array('path' => $imagePath, 'width' => 300, 'height' => 300)
         );
 
         $reporter->setImageValue(array_keys($variablesReplace), $variablesReplace);
 
-        $reporter->render([]);
+        $reporter->render(["records" => [
+            [
+                "a" => "a1",
+                "b" => "b1",
+                "c" => "c1"
+            ],
+            [
+                "a" => "a2",
+                "b" => "b2",
+                "c" => "c2"
+            ]
+        ]]);
 
         $docName = "./tests/templates/image.docx";
 
@@ -731,7 +742,7 @@ class PhpDocxTemplateTest extends TestCase
         $expectedContentTypesXml = $expectedDocumentZip->getFromName('[Content_Types].xml');
         $expectedDocumentRelationsXml = $expectedDocumentZip->getFromName('word/_rels/document.xml.rels');
         $expectedMainPartXml = $expectedDocumentZip->getFromName('word/document.xml');
-        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId6_document.jpeg');
+        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId7_document.jpeg');
         if (false === $expectedDocumentZip->close()) {
             throw new \Exception("Could not close zip file \"{$docName}\".");
         }
