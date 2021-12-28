@@ -715,7 +715,7 @@ class PhpDocxTemplateTest extends TestCase
         $imagePath = __DIR__ . "/images/earth.jpg";
 
         $variablesReplace = array(
-            'image' => array('path' => $imagePath, 'width' => 300, 'height' => 300)
+            'earth' => array('path' => $imagePath, 'width' => 300, 'height' => 300)
         );
 
         $reporter->setImageValue(array_keys($variablesReplace), $variablesReplace);
@@ -724,12 +724,14 @@ class PhpDocxTemplateTest extends TestCase
             [
                 "a" => "a1",
                 "b" => "b1",
-                "c" => "c1"
+                "c" => "c1",
+                "d" => "path1"
             ],
             [
                 "a" => "a2",
                 "b" => "b2",
-                "c" => "c2"
+                "c" => "c2",
+                "d" => "path2"
             ]
         ]]);
 

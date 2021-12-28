@@ -411,7 +411,7 @@ class PhpDocxTemplate
 
         $ext = new ImageExtension();
         $ext->addListener(
-            new RenderListener()
+            new RenderListener($this)
         );
 
         $template = new Environment(new ArrayLoader([

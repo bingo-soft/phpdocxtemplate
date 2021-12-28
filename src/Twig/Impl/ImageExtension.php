@@ -16,7 +16,7 @@ class ImageExtension extends AbstractExtension
     public function getFunctions()
     {
         return [
-            new TwigFunction('image', [$this, 'image']),
+            new TwigFunction('image', [$this, 'image'])
         ];
     }
 
@@ -25,11 +25,11 @@ class ImageExtension extends AbstractExtension
         $this->listeners[] = $listener;
     }
 
-    public function image(string $path): string
+    public function image(string $path, ?int $width = 100, ?int $height = 100): string
     {
         foreach ($this->listeners as $listener) {
-            $listener->notify($path);
+            $listener->notify($path, $width, $height);
         }
-        return '111';
+        return 111;
     }
 }

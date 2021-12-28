@@ -2,12 +2,20 @@
 
 namespace PhpDocxTemplate\Twig\Impl;
 
+use PhpDocxTemplate\PhpDocxTemplate;
 use PhpDocxTemplate\Twig\RenderListenerInterface;
 
 class RenderListener implements RenderListenerInterface
 {
-    public function notify(string $path): void
+    private $template;
+
+    public function __construct(PhpDocxTemplate $template)
     {
-        echo $path, "\r\n";
+        $this->template = $template;
+    }
+
+    public function notify(string $path, int $width, int $height): void
+    {
+        var_dump($path);
     }
 }
