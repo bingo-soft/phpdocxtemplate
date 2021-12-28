@@ -744,7 +744,7 @@ class PhpDocxTemplateTest extends TestCase
         $expectedContentTypesXml = $expectedDocumentZip->getFromName('[Content_Types].xml');
         $expectedDocumentRelationsXml = $expectedDocumentZip->getFromName('word/_rels/document.xml.rels');
         $expectedMainPartXml = $expectedDocumentZip->getFromName('word/document.xml');
-        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId7_document.jpeg');
+        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId5_document.jpeg');
         if (false === $expectedDocumentZip->close()) {
             throw new \Exception("Could not close zip file \"{$docName}\".");
         }
