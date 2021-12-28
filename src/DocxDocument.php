@@ -325,8 +325,8 @@ class DocxDocument
         $imageRatio = $actualWidth / $actualHeight;
 
         if (($width === '') && ($height === '')) { // defined size are empty
-            $width = $actualWidth . 'px';
-            $height = $actualHeight . 'px';
+            $width = $actualWidth . 'pt';
+            $height = $actualHeight . 'pt';
         } elseif ($width === '') { // defined width is empty
             $heightFloat = (float) $height;
             $widthFloat = $heightFloat * $imageRatio;
@@ -373,7 +373,7 @@ class DocxDocument
             $value = $defaultValue;
         }
         if (is_numeric($value)) {
-            $value .= 'px';
+            $value .= 'pt';
         }
 
         return $value;
