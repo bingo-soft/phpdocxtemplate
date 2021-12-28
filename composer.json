@@ -15,7 +15,8 @@
     "ext-zip": "*",
     "ext-dom": "*",
     "php": "^7.2",
-    "twig/twig":"^3.0"
+    "twig/twig":"^3.0",
+    "endroid/qr-code": "^4.4"
   },
   "require-dev": {
     "doctrine/coding-standard": "^6.0",

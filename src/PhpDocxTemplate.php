@@ -8,7 +8,9 @@ use Twig\Loader\ArrayLoader;
 use Twig\Environment;
 use PhpDocxTemplate\Twig\Impl\{
     ImageExtension,
-    ImageRenderer
+    ImageRenderer,
+    QrCodeExtension,
+    QrCodeRenderer
 };
 
 /**
@@ -409,15 +411,24 @@ class PhpDocxTemplate
     {
         $srcXml = str_replace('<w:p>', "\n<w:p>", $srcXml);
 
+        $template = new Environment(new ArrayLoader([
+            'index' => $srcXml,
+        ]));
+
+
         $ext = new ImageExtension();
         $ext->setRenderer(
             new ImageRenderer($this)
         );
-
-        $template = new Environment(new ArrayLoader([
-            'index' => $srcXml,
-        ]));
         $template->addExtension($ext);
+
+
+        $ext = new QrCodeExtension();
+        $ext->setRenderer(
+            new QrCodeRenderer($this)
+        );
+        $template->addExtension($ext);
+
 
         $dstXml = $template->render('index', $context);
 
