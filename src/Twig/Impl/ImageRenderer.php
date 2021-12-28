@@ -25,7 +25,7 @@ class ImageRenderer implements RendererInterface
         $rid = 'rId' . $imgIndex;
 
         // replace preparations
-        $docx->addImageToRelations($path, $rid, $imgPath, $preparedImageAttrs['mime']);
+        $docx->addImageToRelations($docx->getMainPartName(), $rid, $imgPath, $preparedImageAttrs['mime']);
         $xmlImage = str_replace(array('{RID}', '{WIDTH}', '{HEIGHT}'), array($rid, $preparedImageAttrs['width'], $preparedImageAttrs['height']), $docx->getImageTemplate());
         return $xmlImage;
     }
