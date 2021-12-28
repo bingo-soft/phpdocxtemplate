@@ -6,6 +6,10 @@ use DOMDocument;
 use DOMElement;
 use Twig\Loader\ArrayLoader;
 use Twig\Environment;
+use PhpDocxTemplate\Twig\Impl\{
+    ImageExtension,
+    RenderListener
+};
 
 /**
  * Class PhpDocxTemplate
@@ -405,9 +409,16 @@ class PhpDocxTemplate
     {
         $srcXml = str_replace('<w:p>', "\n<w:p>", $srcXml);
 
+        $ext = new ImageExtension();
+        $ext->addListener(
+            new RenderListener()
+        );
+
         $template = new Environment(new ArrayLoader([
             'index' => $srcXml,
         ]));
+        $template->addExtension($ext);
+
         $dstXml = $template->render('index', $context);
 
         $dstXml = str_replace(
