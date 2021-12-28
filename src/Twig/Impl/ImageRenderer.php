@@ -21,7 +21,7 @@ class ImageRenderer implements RendererInterface
         $imgPath = $preparedImageAttrs['src'];
 
         // get image index
-        $imgIndex = $docx->getNextRelationsIndex($path);
+        $imgIndex = $docx->getNextRelationsIndex($docx->getMainPartName());
         $rid = 'rId' . $imgIndex;
 
         // replace preparations

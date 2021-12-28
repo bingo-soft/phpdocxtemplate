@@ -82,7 +82,7 @@ class DocxDocument
      *
      * @return string
      */
-    private function getMainPartName(): string
+    public function getMainPartName(): string
     {
         $contentTypes = $this->zipClass->getFromName('[Content_Types].xml');
 
@@ -392,6 +392,7 @@ class DocxDocument
             'image/bmp'  => 'bmp',
             'image/gif'  => 'gif',
         );
+        //tempDocumentRelations
 
         // get image embed name
         if (isset($this->tempDocumentNewImages[$imgPath])) {
