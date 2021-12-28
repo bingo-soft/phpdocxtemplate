@@ -8,7 +8,7 @@ use Twig\Loader\ArrayLoader;
 use Twig\Environment;
 use PhpDocxTemplate\Twig\Impl\{
     ImageExtension,
-    RenderListener
+    ImageRenderer
 };
 
 /**
@@ -410,8 +410,8 @@ class PhpDocxTemplate
         $srcXml = str_replace('<w:p>', "\n<w:p>", $srcXml);
 
         $ext = new ImageExtension();
-        $ext->addListener(
-            new RenderListener($this)
+        $ext->setRenderer(
+            new ImageRenderer($this)
         );
 
         $template = new Environment(new ArrayLoader([

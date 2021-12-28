@@ -725,13 +725,19 @@ class PhpDocxTemplateTest extends TestCase
                 "a" => "a1",
                 "b" => "b1",
                 "c" => "c1",
-                "d" => "path1"
+                "d" => __DIR__ . "/images/planet1.png"
             ],
             [
                 "a" => "a2",
                 "b" => "b2",
                 "c" => "c2",
-                "d" => "path2"
+                "d" => __DIR__ . "/images/planet2.png"
+            ],
+            [
+                "a" => "a3",
+                "b" => "b2",
+                "c" => "c2",
+                "d" => __DIR__ . "/images/planet3.png"
             ]
         ]]);
 

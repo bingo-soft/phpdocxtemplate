@@ -4,11 +4,11 @@ namespace PhpDocxTemplate\Twig\Impl;
 
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
-use PhpDocxTemplate\Twig\RenderListenerInterface;
+use PhpDocxTemplate\Twig\RendererInterface;
 
 class ImageExtension extends AbstractExtension
 {
-    private $listeners = [];
+    private $renderer;
 
     /**
      * @return mixed
@@ -20,16 +20,13 @@ class ImageExtension extends AbstractExtension
         ];
     }
 
-    public function addListener(RenderListenerInterface $listener): void
+    public function setRenderer(RendererInterface $renderer): void
     {
-        $this->listeners[] = $listener;
+        $this->renderer = $renderer;
     }
 
     public function image(string $path, ?int $width = 100, ?int $height = 100): string
     {
-        foreach ($this->listeners as $listener) {
-            $listener->notify($path, $width, $height);
-        }
-        return 111;
+        return $this->renderer->render($path, $width, $height);
     }
 }

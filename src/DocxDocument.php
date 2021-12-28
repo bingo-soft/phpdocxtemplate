@@ -134,7 +134,7 @@ class DocxDocument
         return 'word/_rels/' . pathinfo($documentPartName, PATHINFO_BASENAME) . '.rels';
     }
 
-    private function getNextRelationsIndex(string $documentPartName): int
+    public function getNextRelationsIndex(string $documentPartName): int
     {
         if (isset($this->tempDocumentRelations[$documentPartName])) {
             $candidate = substr_count($this->tempDocumentRelations[$documentPartName], '<Relationship');
@@ -259,7 +259,7 @@ class DocxDocument
      *
      * @return array
      */
-    private function prepareImageAttrs($replaceImage, array $varInlineArgs): array
+    public function prepareImageAttrs($replaceImage, array $varInlineArgs = []): array
     {
         // get image path and size
         $width = null;
@@ -379,7 +379,7 @@ class DocxDocument
         return $value;
     }
 
-    private function addImageToRelations(string $partFileName, string $rid, string $imgPath, string $imageMimeType): void
+    public function addImageToRelations(string $partFileName, string $rid, string $imgPath, string $imageMimeType): void
     {
         // define templates
         $typeTpl = '<Override PartName="/word/media/{IMG}" ContentType="image/{EXT}"/>';
@@ -460,7 +460,7 @@ class DocxDocument
         );
         // define templates
         // result can be verified via "Open XML SDK 2.5 Productivity Tool" (http://www.microsoft.com/en-us/download/details.aspx?id=30425)
-        $imgTpl = '<w:pict><v:shape xmlns:v="urn:schemas-microsoft-com:vml" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:o="urn:schemas-microsoft-com:office:office" type="#_x0000_t75" style="width:{WIDTH};height:{HEIGHT}" stroked="f"><v:imagedata r:id="{RID}" o:title=""/></v:shape></w:pict>';
+        $imgTpl = $this->getImageTemplate();
 
         foreach ($searchParts as $partFileName => &$partContent) {
             $partVariables = $this->getVariablesForPart($partContent);
@@ -472,6 +472,7 @@ class DocxDocument
 
                 foreach ($varsToReplace as $varNameWithArgs) {
                     $varInlineArgs = $this->getImageArgs($varNameWithArgs);
+
                     $preparedImageAttrs = $this->prepareImageAttrs($replaceImage, $varInlineArgs);
                     $imgPath = $preparedImageAttrs['src'];
 
@@ -499,6 +500,11 @@ class DocxDocument
         }
 
         $this->document = $this->tempDocumentMainPart;
+    }
+
+    public function getImageTemplate(): string
+    {
+        return '<w:pict><v:shape xmlns:v="urn:schemas-microsoft-com:vml" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:o="urn:schemas-microsoft-com:office:office" type="#_x0000_t75" style="width:{WIDTH};height:{HEIGHT}" stroked="f"><v:imagedata r:id="{RID}" o:title=""/></v:shape></w:pict>';
     }
 
     /**
