@@ -6,9 +6,9 @@ use PHPUnit\Framework\TestCase;
 use DOMDocument;
 use PhpDocxTemplate\PhpDocxTemplate;
 use PhpDocxTemplate\DocxDocument;
+use PhpDocxTemplate\Zip\ZipArchive;
 use Twig\Loader\ArrayLoader;
 use Twig\Environment;
-use ZipArchive;
 
 class PhpDocxTemplateTest extends TestCase
 {

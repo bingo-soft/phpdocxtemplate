@@ -5,10 +5,10 @@ namespace PhpDocxTemplate;
 use DOMDocument;
 use DOMElement;
 use Exception;
-use ZipArchive;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use PhpDocxTemplate\Escaper\RegExp;
+use PhpDocxTemplate\Zip\ZipArchive;
 
 /**
  * Class DocxDocument
@@ -697,7 +697,7 @@ class DocxDocument
         if (isset($this->tempDocumentRelations[$fileName])) {
             $relsFileName = $this->getRelationsName($fileName);
             $this->skipFiles[] = basename($relsFileName);
-            $target->addFromString($relsFileName, $this->tempDocumentRelations[$fileName]);
+            $target->pclzipAddFromString($relsFileName, $this->tempDocumentRelations[$fileName]);
         }
     }
 
@@ -714,10 +714,10 @@ class DocxDocument
         $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
         $this->savePartWithRels($zip, $this->getMainPartName(), $this->tempDocumentMainPart);
-        $zip->addFromString($this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
+        $zip->pclzipAddFromString($this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
 
         foreach ($this->tempDocumentNewImages as $imgPath => $imgName) {
-            $zip->addFile($imgPath, 'word/media/' . $imgName);
+            $zip->pclzipAddFile($imgPath, 'word/media/' . $imgName);
         }
 
         $files = new RecursiveIteratorIterator(
@@ -730,7 +730,7 @@ class DocxDocument
                 $filePath = $file->getRealPath();
                 $relativePath = substr($filePath, strlen($rootPath) + 1);
                 if (!in_array(basename($filePath), $this->skipFiles)) {
-                    $zip->addFile($filePath, $relativePath);
+                    $zip->pclzipAddFile($filePath, $relativePath);
                 }
             }
         }
