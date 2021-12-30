@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use DOMDocument;
 use PhpDocxTemplate\PhpDocxTemplate;
 use PhpDocxTemplate\DocxDocument;
-use PhpDocxTemplate\Zip\ZipArchive;
+use ZipArchive;
 use Twig\Loader\ArrayLoader;
 use Twig\Environment;
 
