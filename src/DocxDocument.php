@@ -492,9 +492,10 @@ class DocxDocument
                     $matches = array();
                     if (preg_match('/(<[^<]+>)([^<]*)(' . preg_quote($varNameWithArgsFixed) . ')([^>]*)(<[^>]+>)/Uu', $partContent, $matches)) {
                         $wholeTag = $matches[0];
+                        $before = str_replace($varNameWithArgsFixed, '', $wholeTag);
                         array_shift($matches);
                         list($openTag, $prefix, , $postfix, $closeTag) = $matches;
-                        $replaceXml = $openTag . $prefix . $closeTag . $xmlImage . $openTag . $postfix . $closeTag;
+                        $replaceXml = $before . $openTag . $prefix . $closeTag . $xmlImage . $openTag . $postfix . $closeTag;
                         // replace on each iteration, because in one tag we can have 2+ inline variables => before proceed next variable we need to change $partContent
                         $partContent = $this->setValueForPart($wholeTag, $replaceXml, $partContent);
                     }
