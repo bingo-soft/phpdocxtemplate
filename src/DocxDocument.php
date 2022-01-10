@@ -3,7 +3,6 @@
 namespace PhpDocxTemplate;
 
 use DOMDocument;
-use DOMElement;
 use Exception;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
@@ -25,7 +24,6 @@ class DocxDocument
     private $tempDocumentRelations = [];
     private $tempDocumentContentTypes = '';
     private $tempDocumentNewImages = [];
-    private $skipFiles = [];
 
     /**
      * Construct an instance of Document
@@ -38,7 +36,7 @@ class DocxDocument
     {
         if (file_exists($path)) {
             $this->path = $path;
-            $this->tmpDir = sys_get_temp_dir() . "/" . uniqid("", true) . date("His");
+            $this->tmpDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid("", true) . date("His");
             $this->zipClass = new ZipArchive();
             $this->extract();
         } else {
@@ -64,7 +62,7 @@ class DocxDocument
 
         $this->tempDocumentContentTypes = $this->zipClass->getFromName($this->getDocumentContentTypesName());
 
-        $this->document = file_get_contents($this->tmpDir . "/word/document.xml");
+        $this->document = file_get_contents(sprintf('%s%sword%sdocument.xml', $this->tmpDir, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR));
     }
 
     /**
@@ -93,7 +91,7 @@ class DocxDocument
         $matches = [];
         preg_match($pattern, $contentTypes, $matches);
 
-        return array_key_exists(1, $matches) ? $matches[1] : 'word/document.xml';
+        return array_key_exists(1, $matches) ? $matches[1] : sprintf('word%sdocument.xml', DIRECTORY_SEPARATOR);
     }
 
     /**
@@ -131,7 +129,7 @@ class DocxDocument
      */
     private function getRelationsName(string $documentPartName): string
     {
-        return 'word/_rels/' . pathinfo($documentPartName, PATHINFO_BASENAME) . '.rels';
+        return sprintf('word%s_rels%s%s.rels', DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, pathinfo($documentPartName, PATHINFO_BASENAME));
     }
 
     public function getNextRelationsIndex(string $documentPartName): int
@@ -188,7 +186,7 @@ class DocxDocument
      */
     private function getHeaderName(int $index): string
     {
-        return sprintf('word/header%d.xml', $index);
+        return sprintf('word%sheader%d.xml', DIRECTORY_SEPARATOR, $index);
     }
 
     /**
@@ -200,7 +198,7 @@ class DocxDocument
      */
     private function getFooterName(int $index): string
     {
-        return sprintf('word/footer%d.xml', $index);
+        return sprintf('word%sfooter%d.xml', DIRECTORY_SEPARATOR, $index);
     }
 
     /**
@@ -409,11 +407,11 @@ class DocxDocument
             $imgName = 'image_' . $rid . '_' . pathinfo($partFileName, PATHINFO_FILENAME) . '.' . $imgExt;
             $this->tempDocumentNewImages[$imgPath] = $imgName;
 
-            $targetDir = $this->tmpDir . '/word/media';
+            $targetDir = sprintf('%s%sword%smedia', $this->tmpDir, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR);
             if (!file_exists($targetDir)) {
-                mkdir($targetDir, 777, true);
+                mkdir($targetDir, 0777, true);
             }
-            copy($imgPath, $this->tmpDir . '/word/media/' . $imgName);
+            copy($imgPath, sprintf('%s%s%s', $targetDir, DIRECTORY_SEPARATOR, $imgName));
 
             // setup type for image
             $xmlImageType = str_replace(array('{IMG}', '{EXT}'), array($imgName, $imgExt), $typeTpl);
@@ -549,7 +547,7 @@ class DocxDocument
     public function updateDOMDocument(DOMDocument $dom): void
     {
         $this->document = $dom->saveXml();
-        file_put_contents($this->tmpDir . "/word/document.xml", $this->document);
+        file_put_contents(sprintf('%s%sword%sdocument.xml', $this->tmpDir, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR), $this->document);
     }
 
     /**
@@ -692,17 +690,16 @@ class DocxDocument
 
     /**
      * @param string $fileName
-     * @param string $xml
      */
-    protected function savePartWithRels(string $fileName, string $xml): void
+    protected function savePartWithRels(string $fileName): void
     {
         if (isset($this->tempDocumentRelations[$fileName])) {
             $relsFileName = $this->getRelationsName($fileName);
-            $targetDir = dirname($this->tmpDir . '/' . $relsFileName);
+            $targetDir = dirname($this->tmpDir . DIRECTORY_SEPARATOR . $relsFileName);
             if (!file_exists($targetDir)) {
-                mkdir($targetDir, 777, true);
+                mkdir($targetDir, 0777, true);
             }
-            file_put_contents($this->tmpDir . '/' . $relsFileName, $this->tempDocumentRelations[$fileName]);
+            file_put_contents($this->tmpDir . DIRECTORY_SEPARATOR . $relsFileName, $this->tempDocumentRelations[$fileName]);
         }
     }
 
@@ -718,8 +715,8 @@ class DocxDocument
         $zip = new ZipArchive();
         $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
-        $this->savePartWithRels($this->getMainPartName(), $this->tempDocumentMainPart);
-        file_put_contents($this->tmpDir . '/' . $this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
+        $this->savePartWithRels($this->getMainPartName());
+        file_put_contents($this->tmpDir . DIRECTORY_SEPARATOR . $this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
 
         $files = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($rootPath),
@@ -754,10 +751,10 @@ class DocxDocument
         if (is_array($objects)) {
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    if (filetype($dir . "/" . $object) == "dir") {
-                        $this->rrmdir($dir . "/" . $object);
+                    if (filetype($dir . DIRECTORY_SEPARATOR . $object) == "dir") {
+                        $this->rrmdir($dir . DIRECTORY_SEPARATOR . $object);
                     } else {
-                        unlink($dir . "/" . $object);
+                        unlink($dir . DIRECTORY_SEPARATOR . $object);
                     }
                 }
             }
