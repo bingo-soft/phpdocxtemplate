@@ -3,7 +3,6 @@
 namespace PhpDocxTemplate;
 
 use DOMDocument;
-use DOMElement;
 use Exception;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
@@ -25,7 +24,6 @@ class DocxDocument
     private $tempDocumentRelations = [];
     private $tempDocumentContentTypes = '';
     private $tempDocumentNewImages = [];
-    private $skipFiles = [];
 
     /**
      * Construct an instance of Document
@@ -38,7 +36,7 @@ class DocxDocument
     {
         if (file_exists($path)) {
             $this->path = $path;
-            $this->tmpDir = sys_get_temp_dir() . "/" . uniqid("", true) . date("His");
+            $this->tmpDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid("", true) . date("His");
             $this->zipClass = new ZipArchive();
             $this->extract();
         } else {
@@ -64,7 +62,7 @@ class DocxDocument
 
         $this->tempDocumentContentTypes = $this->zipClass->getFromName($this->getDocumentContentTypesName());
 
-        $this->document = file_get_contents($this->tmpDir . "/word/document.xml");
+        $this->document = file_get_contents(sprintf('%s%sword%sdocument.xml', $this->tmpDir, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR));
     }
 
     /**
@@ -87,8 +85,8 @@ class DocxDocument
         $contentTypes = $this->zipClass->getFromName('[Content_Types].xml');
 
         $pattern = '~PartName="\/(word\/document.*?\.xml)" ' .
-                   'ContentType="application\/vnd\.openxmlformats-officedocument' .
-                   '\.wordprocessingml\.document\.main\+xml"~';
+            'ContentType="application\/vnd\.openxmlformats-officedocument' .
+            '\.wordprocessingml\.document\.main\+xml"~';
 
         $matches = [];
         preg_match($pattern, $contentTypes, $matches);
@@ -188,7 +186,7 @@ class DocxDocument
      */
     private function getHeaderName(int $index): string
     {
-        return sprintf('word/header%d.xml', $index);
+        return sprintf('word%sheader%d.xml', DIRECTORY_SEPARATOR, $index);
     }
 
     /**
@@ -200,7 +198,7 @@ class DocxDocument
      */
     private function getFooterName(int $index): string
     {
-        return sprintf('word/footer%d.xml', $index);
+        return sprintf('word%sfooter%d.xml', DIRECTORY_SEPARATOR, $index);
     }
 
     /**
@@ -307,8 +305,8 @@ class DocxDocument
         $imageAttrs = array(
             'src'    => $imgPath,
             'mime'   => image_type_to_mime_type($imageType),
-            'width'  => $width,
-            'height' => $height,
+            'width'  => $width * 9525,
+            'height' => $height * 9525,
         );
 
         return $imageAttrs;
@@ -325,38 +323,14 @@ class DocxDocument
         $imageRatio = $actualWidth / $actualHeight;
 
         if (($width === '') && ($height === '')) { // defined size are empty
-            $width = $actualWidth . 'pt';
-            $height = $actualHeight . 'pt';
+            $width = $actualWidth;
+            $height = $actualHeight;
         } elseif ($width === '') { // defined width is empty
             $heightFloat = (float) $height;
-            $widthFloat = $heightFloat * $imageRatio;
-            $matches = array();
-            preg_match("/\d([a-z%]+)$/", $height, $matches);
-            $width = $widthFloat . $matches[1];
+            $width = $heightFloat * $imageRatio;
         } elseif ($height === '') { // defined height is empty
             $widthFloat = (float) $width;
-            $heightFloat = $widthFloat / $imageRatio;
-            $matches = array();
-            preg_match("/\d([a-z%]+)$/", $width, $matches);
-            $height = $heightFloat . $matches[1];
-        } else { // we have defined size, but we need also check it aspect ratio
-            $widthMatches = array();
-            preg_match("/\d([a-z%]+)$/", $width, $widthMatches);
-            $heightMatches = array();
-            preg_match("/\d([a-z%]+)$/", $height, $heightMatches);
-            // try to fix only if dimensions are same
-            if ($widthMatches[1] == $heightMatches[1]) {
-                $dimention = $widthMatches[1];
-                $widthFloat = (float) $width;
-                $heightFloat = (float) $height;
-                $definedRatio = $widthFloat / $heightFloat;
-
-                if ($imageRatio > $definedRatio) { // image wider than defined box
-                    $height = ($widthFloat / $imageRatio) . $dimention;
-                } elseif ($imageRatio < $definedRatio) { // image higher than defined box
-                    $width = ($heightFloat * $imageRatio) . $dimention;
-                }
-            }
+            $height = $widthFloat / $imageRatio;
         }
     }
 
@@ -371,9 +345,6 @@ class DocxDocument
         }
         if (is_null($value)) {
             $value = $defaultValue;
-        }
-        if (is_numeric($value)) {
-            $value .= 'pt';
         }
 
         return $value;
@@ -409,11 +380,11 @@ class DocxDocument
             $imgName = 'image_' . $rid . '_' . pathinfo($partFileName, PATHINFO_FILENAME) . '.' . $imgExt;
             $this->tempDocumentNewImages[$imgPath] = $imgName;
 
-            $targetDir = $this->tmpDir . '/word/media';
+            $targetDir = sprintf('%s%sword%smedia', $this->tmpDir, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR);
             if (!file_exists($targetDir)) {
-                mkdir($targetDir, 777, true);
+                mkdir($targetDir, 0777, true);
             }
-            copy($imgPath, $this->tmpDir . '/word/media/' . $imgName);
+            copy($imgPath, sprintf('%s%s%s', $targetDir, DIRECTORY_SEPARATOR, $imgName));
 
             // setup type for image
             $xmlImageType = str_replace(array('{IMG}', '{EXT}'), array($imgName, $imgExt), $typeTpl);
@@ -549,7 +520,7 @@ class DocxDocument
     public function updateDOMDocument(DOMDocument $dom): void
     {
         $this->document = $dom->saveXml();
-        file_put_contents($this->tmpDir . "/word/document.xml", $this->document);
+        file_put_contents(sprintf('%s%sword%sdocument.xml', $this->tmpDir, DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR), $this->document);
     }
 
     /**
@@ -692,17 +663,16 @@ class DocxDocument
 
     /**
      * @param string $fileName
-     * @param string $xml
      */
-    protected function savePartWithRels(string $fileName, string $xml): void
+    protected function savePartWithRels(string $fileName): void
     {
         if (isset($this->tempDocumentRelations[$fileName])) {
             $relsFileName = $this->getRelationsName($fileName);
-            $targetDir = dirname($this->tmpDir . '/' . $relsFileName);
+            $targetDir = dirname($this->tmpDir . DIRECTORY_SEPARATOR . $relsFileName);
             if (!file_exists($targetDir)) {
-                mkdir($targetDir, 777, true);
+                mkdir($targetDir, 0777, true);
             }
-            file_put_contents($this->tmpDir . '/' . $relsFileName, $this->tempDocumentRelations[$fileName]);
+            file_put_contents($this->tmpDir . DIRECTORY_SEPARATOR . $relsFileName, $this->tempDocumentRelations[$fileName]);
         }
     }
 
@@ -718,8 +688,8 @@ class DocxDocument
         $zip = new ZipArchive();
         $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
-        $this->savePartWithRels($this->getMainPartName(), $this->tempDocumentMainPart);
-        file_put_contents($this->tmpDir . '/' . $this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
+        $this->savePartWithRels($this->getMainPartName());
+        file_put_contents($this->tmpDir . DIRECTORY_SEPARATOR . $this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
 
         $files = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($rootPath),
@@ -727,8 +697,8 @@ class DocxDocument
         );
 
         foreach ($files as $name => $file) {
-            if (!$file->isDir()) {
-                $filePath = $file->getRealPath();
+            $filePath = $file->getRealPath();
+            if (file_exists($filePath) && is_file($filePath)) {
                 $relativePath = substr($filePath, strlen($rootPath) + 1);
                 $zip->addFile($filePath, $relativePath);
             }
@@ -754,10 +724,10 @@ class DocxDocument
         if (is_array($objects)) {
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    if (filetype($dir . "/" . $object) == "dir") {
-                        $this->rrmdir($dir . "/" . $object);
+                    if (filetype($dir . DIRECTORY_SEPARATOR . $object) == "dir") {
+                        $this->rrmdir($dir . DIRECTORY_SEPARATOR . $object);
                     } else {
-                        unlink($dir . "/" . $object);
+                        unlink($dir . DIRECTORY_SEPARATOR . $object);
                     }
                 }
             }
