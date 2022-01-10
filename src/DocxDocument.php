@@ -305,8 +305,8 @@ class DocxDocument
         $imageAttrs = array(
             'src'    => $imgPath,
             'mime'   => image_type_to_mime_type($imageType),
-            'width'  => $width * 9525,
-            'height' => $height * 9525,
+            'width'  => $width,
+            'height' => $height,
         );
 
         return $imageAttrs;
@@ -323,14 +323,38 @@ class DocxDocument
         $imageRatio = $actualWidth / $actualHeight;
 
         if (($width === '') && ($height === '')) { // defined size are empty
-            $width = $actualWidth;
-            $height = $actualHeight;
+            $width = $actualWidth . 'pt';
+            $height = $actualHeight . 'pt';
         } elseif ($width === '') { // defined width is empty
             $heightFloat = (float) $height;
-            $width = $heightFloat * $imageRatio;
+            $widthFloat = $heightFloat * $imageRatio;
+            $matches = array();
+            preg_match("/\d([a-z%]+)$/", $height, $matches);
+            $width = $widthFloat . $matches[1];
         } elseif ($height === '') { // defined height is empty
             $widthFloat = (float) $width;
-            $height = $widthFloat / $imageRatio;
+            $heightFloat = $widthFloat / $imageRatio;
+            $matches = array();
+            preg_match("/\d([a-z%]+)$/", $width, $matches);
+            $height = $heightFloat . $matches[1];
+        } else { // we have defined size, but we need also check it aspect ratio
+            $widthMatches = array();
+            preg_match("/\d([a-z%]+)$/", $width, $widthMatches);
+            $heightMatches = array();
+            preg_match("/\d([a-z%]+)$/", $height, $heightMatches);
+            // try to fix only if dimensions are same
+            if ($widthMatches[1] == $heightMatches[1]) {
+                $dimention = $widthMatches[1];
+                $widthFloat = (float) $width;
+                $heightFloat = (float) $height;
+                $definedRatio = $widthFloat / $heightFloat;
+
+                if ($imageRatio > $definedRatio) { // image wider than defined box
+                    $height = ($widthFloat / $imageRatio) . $dimention;
+                } elseif ($imageRatio < $definedRatio) { // image higher than defined box
+                    $width = ($heightFloat * $imageRatio) . $dimention;
+                }
+            }
         }
     }
 
@@ -345,6 +369,9 @@ class DocxDocument
         }
         if (is_null($value)) {
             $value = $defaultValue;
+        }
+        if (is_numeric($value)) {
+            $value .= 'pt';
         }
 
         return $value;
