@@ -14,10 +14,10 @@ class ImageRenderer implements RendererInterface
         $this->template = $template;
     }
 
-    public function render(string $path, int $width, int $height): string
+    public function render(string $path, int $width, int $height, string $unit): string
     {
         $docx = $this->template->getDocx();
-        $preparedImageAttrs = $docx->prepareImageAttrs(['path' => $path, 'width' => $width, 'height' => $height]);
+        $preparedImageAttrs = $docx->prepareImageAttrs(['path' => $path, 'width' => $width, 'height' => $height, 'unit'=>$unit]);
         $imgPath = $preparedImageAttrs['src'];
 
         // get image index
@@ -26,7 +26,7 @@ class ImageRenderer implements RendererInterface
 
         // replace preparations
         $docx->addImageToRelations($docx->getMainPartName(), $rid, $imgPath, $preparedImageAttrs['mime']);
-        $xmlImage = str_replace(array('{RID}', '{WIDTH}', '{HEIGHT}'), array($rid, $preparedImageAttrs['width'], $preparedImageAttrs['height']), $docx->getImageTemplate());
+        $xmlImage = str_replace(array('{IMAGEID}', '{WIDTH}', '{HEIGHT}'), array($imgIndex, $preparedImageAttrs['width'], $preparedImageAttrs['height']), $docx->getImageTemplate());
         return $xmlImage;
     }
 }

@@ -262,6 +262,7 @@ class DocxDocument
         // get image path and size
         $width = null;
         $height = null;
+        $unit = null;
         $ratio = null;
 
         // a closure can be passed as replacement value which after resolving, can contain the replacement info for the image
@@ -278,6 +279,9 @@ class DocxDocument
             if (isset($replaceImage['height'])) {
                 $height = $replaceImage['height'];
             }
+            if (isset($replaceImage['unit'])) {
+                $unit = $replaceImage['unit'];
+            }
             if (isset($replaceImage['ratio'])) {
                 $ratio = $replaceImage['ratio'];
             }
@@ -285,8 +289,8 @@ class DocxDocument
             $imgPath = $replaceImage;
         }
 
-        $width = $this->chooseImageDimension($width, isset($varInlineArgs['width']) ? $varInlineArgs['width'] : null, 115);
-        $height = $this->chooseImageDimension($height, isset($varInlineArgs['height']) ? $varInlineArgs['height'] : null, 70);
+        $width = $this->chooseImageDimension($width, $unit ? $unit : 'px', isset($varInlineArgs['width']) ? $varInlineArgs['width'] : null, 115);
+        $height = $this->chooseImageDimension($height, $unit ? $unit : 'px', isset($varInlineArgs['height']) ? $varInlineArgs['height'] : null, 70);
 
         $imageData = @getimagesize($imgPath);
         if (!is_array($imageData)) {
@@ -303,10 +307,10 @@ class DocxDocument
         }
 
         $imageAttrs = array(
-            'src'    => $imgPath,
-            'mime'   => image_type_to_mime_type($imageType),
-            'width'  => $width,
-            'height' => $height,
+            'src' => $imgPath,
+            'mime' => image_type_to_mime_type($imageType),
+            'width' => $width * 9525,
+            'height' => $height * 9525,
         );
 
         return $imageAttrs;
@@ -323,57 +327,37 @@ class DocxDocument
         $imageRatio = $actualWidth / $actualHeight;
 
         if (($width === '') && ($height === '')) { // defined size are empty
-            $width = $actualWidth . 'pt';
-            $height = $actualHeight . 'pt';
+            $width = $actualWidth;
+            $height = $actualHeight;
         } elseif ($width === '') { // defined width is empty
-            $heightFloat = (float) $height;
-            $widthFloat = $heightFloat * $imageRatio;
-            $matches = array();
-            preg_match("/\d([a-z%]+)$/", $height, $matches);
-            $width = $widthFloat . $matches[1];
+            $heightFloat = (float)$height;
+            $width = $heightFloat * $imageRatio;
         } elseif ($height === '') { // defined height is empty
-            $widthFloat = (float) $width;
-            $heightFloat = $widthFloat / $imageRatio;
-            $matches = array();
-            preg_match("/\d([a-z%]+)$/", $width, $matches);
-            $height = $heightFloat . $matches[1];
-        } else { // we have defined size, but we need also check it aspect ratio
-            $widthMatches = array();
-            preg_match("/\d([a-z%]+)$/", $width, $widthMatches);
-            $heightMatches = array();
-            preg_match("/\d([a-z%]+)$/", $height, $heightMatches);
-            // try to fix only if dimensions are same
-            if ($widthMatches[1] == $heightMatches[1]) {
-                $dimention = $widthMatches[1];
-                $widthFloat = (float) $width;
-                $heightFloat = (float) $height;
-                $definedRatio = $widthFloat / $heightFloat;
-
-                if ($imageRatio > $definedRatio) { // image wider than defined box
-                    $height = ($widthFloat / $imageRatio) . $dimention;
-                } elseif ($imageRatio < $definedRatio) { // image higher than defined box
-                    $width = ($heightFloat * $imageRatio) . $dimention;
-                }
-            }
+            $widthFloat = (float)$width;
+            $height = $widthFloat / $imageRatio;
         }
     }
 
-    private function chooseImageDimension(?int $baseValue, ?int $inlineValue, int $defaultValue): string
+    private function chooseImageDimension($baseValue, string $unit, ?int $inlineValue, int $defaultValue): string
     {
         $value = $baseValue;
         if (is_null($value) && isset($inlineValue)) {
             $value = $inlineValue;
         }
-        if (!preg_match('/^([0-9]*(cm|mm|in|pt|pc|px|%|em|ex|)|auto)$/i', $value)) {
-            $value = null;
-        }
         if (is_null($value)) {
             $value = $defaultValue;
         }
-        if (is_numeric($value)) {
-            $value .= 'pt';
+        switch ($unit) {
+            case 'mm':
+                $value = $value * 3.8; // 1mm = 3.8px
+                break;
+            case 'pt':
+                $value = $value / 3 * 4; // 1pt = 4/3 px
+                break;
+            case 'pc':
+                $value = $value * 16; // 1px = 16px
+                break;
         }
-
         return $value;
     }
 
@@ -483,17 +467,16 @@ class DocxDocument
 
                     // replace preparations
                     $this->addImageToRelations($partFileName, $rid, $imgPath, $preparedImageAttrs['mime']);
-                    $xmlImage = str_replace(array('{RID}', '{WIDTH}', '{HEIGHT}'), array($rid, $preparedImageAttrs['width'], $preparedImageAttrs['height']), $imgTpl);
+                    $xmlImage = str_replace(array('{IMAGEID}', '{WIDTH}', '{HEIGHT}'), array($imgIndex, $preparedImageAttrs['width'], $preparedImageAttrs['height']), $imgTpl);
 
                     // replace variable
                     $varNameWithArgsFixed = self::ensureMacroCompleted($varNameWithArgs);
                     $matches = array();
                     if (preg_match('/(<[^<]+>)([^<]*)(' . preg_quote($varNameWithArgsFixed) . ')([^>]*)(<[^>]+>)/Uu', $partContent, $matches)) {
                         $wholeTag = $matches[0];
-                        $before = str_replace($varNameWithArgsFixed, '', $wholeTag);
                         array_shift($matches);
                         list($openTag, $prefix, , $postfix, $closeTag) = $matches;
-                        $replaceXml = $before . $openTag . $prefix . $closeTag . $xmlImage . $openTag . $postfix . $closeTag;
+                        $replaceXml = $openTag . $prefix . $closeTag . $xmlImage . $openTag . $postfix . $closeTag;
                         // replace on each iteration, because in one tag we can have 2+ inline variables => before proceed next variable we need to change $partContent
                         $partContent = $this->setValueForPart($wholeTag, $replaceXml, $partContent);
                     }
@@ -506,7 +489,7 @@ class DocxDocument
 
     public function getImageTemplate(): string
     {
-        return '<w:pict><v:shape xmlns:v="urn:schemas-microsoft-com:vml" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:o="urn:schemas-microsoft-com:office:office" type="#_x0000_t75" style="width:{WIDTH};height:{HEIGHT}" stroked="f"><v:imagedata r:id="{RID}" o:title=""/></v:shape></w:pict>';
+        return '</w:t></w:r><w:r><w:drawing><wp:inline xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"> <wp:extent cx="{WIDTH}" cy="{HEIGHT}"/> <wp:docPr id="{IMAGEID}" name=""/> <wp:cNvGraphicFramePr> <a:graphicFrameLocks noChangeAspect="1"/> </wp:cNvGraphicFramePr> <a:graphic> <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"> <pic:pic> <pic:nvPicPr> <pic:cNvPr id="{IMAGEID}" name=""/> <pic:cNvPicPr/> </pic:nvPicPr> <pic:blipFill> <a:blip r:embed="rId{IMAGEID}"/> <a:stretch> <a:fillRect/> </a:stretch> </pic:blipFill> <pic:spPr> <a:xfrm> <a:off x="0" y="0"/> <a:ext cx="{WIDTH}" cy="{HEIGHT}"/> </a:xfrm> <a:prstGeom prst="rect"> <a:avLst/> </a:prstGeom> </pic:spPr> </pic:pic> </a:graphicData> </a:graphic> </wp:inline> </w:drawing></w:r><w:r><w:t xml:space="preserve">';
     }
 
     /**
