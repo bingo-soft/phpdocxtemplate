@@ -27,7 +27,7 @@ class QrCodeRenderer implements RendererInterface
         $result->saveToFile($path);
 
         $docx = $this->template->getDocx();
-        $preparedImageAttrs = $docx->prepareImageAttrs(['path' => $path, 'width' => $size, 'height' => $size, 'unit'=>$unit]);
+        $preparedImageAttrs = $docx->prepareImageAttrs(['path' => $path, 'width' => $size, 'height' => $size, 'unit' => $unit]);
         $imgPath = $preparedImageAttrs['src'];
 
         // get image index

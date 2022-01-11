@@ -338,6 +338,12 @@ class DocxDocument
         }
     }
 
+    /**
+     * @param mixed $baseValue
+     * @param string $unit
+     * @param int|null $inlineValue
+     * @param int $defaultValue
+     */
     private function chooseImageDimension($baseValue, string $unit, ?int $inlineValue, int $defaultValue): string
     {
         $value = $baseValue;

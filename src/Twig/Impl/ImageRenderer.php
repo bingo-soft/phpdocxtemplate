@@ -17,7 +17,7 @@ class ImageRenderer implements RendererInterface
     public function render(string $path, int $width, int $height, string $unit): string
     {
         $docx = $this->template->getDocx();
-        $preparedImageAttrs = $docx->prepareImageAttrs(['path' => $path, 'width' => $width, 'height' => $height, 'unit'=>$unit]);
+        $preparedImageAttrs = $docx->prepareImageAttrs(['path' => $path, 'width' => $width, 'height' => $height, 'unit' => $unit]);
         $imgPath = $preparedImageAttrs['src'];
 
         // get image index

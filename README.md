@@ -1,6 +1,6 @@
 [![Latest Stable Version](https://poser.pugx.org/bingo-soft/phpdocxtemplate/v/stable.png)](https://packagist.org/packages/bingo-soft/phpdocxtemplate)
 [![Build Status](https://travis-ci.org/bingo-soft/phpdocxtemplate.png?branch=master)](https://travis-ci.org/bingo-soft/phpdocxtemplate)
-[![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D%207.2-8892BF.svg)](https://php.net/)
+[![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D%207.4-8892BF.svg)](https://php.net/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/bingo-soft/phpdocxtemplate/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/bingo-soft/phpdocxtemplate/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/bingo-soft/phpdocxtemplate/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/bingo-soft/phpdocxtemplate/?branch=master)
