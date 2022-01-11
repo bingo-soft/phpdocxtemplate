@@ -422,80 +422,9 @@ class DocxDocument
         $this->tempDocumentRelations[$partFileName] = str_replace('</Relationships>', $xmlImageRelation, $this->tempDocumentRelations[$partFileName]) . '</Relationships>';
     }
 
-    /**
-     * @param mixed $search
-     * @param mixed $replace Path to image, or array("path" => xx, "width" => yy, "height" => zz)
-     */
-    public function setImageValue($search, $replace): void
-    {
-        // prepare $search_replace
-        if (!is_array($search)) {
-            $search = array($search);
-        }
-
-        $replacesList = array();
-        if (!is_array($replace) || isset($replace['path'])) {
-            $replacesList[] = $replace;
-        } else {
-            $replacesList = array_values($replace);
-        }
-
-        $searchReplace = array();
-        foreach ($search as $searchIdx => $searchString) {
-            $searchReplace[$searchString] = isset($replacesList[$searchIdx]) ? $replacesList[$searchIdx] : $replacesList[0];
-        }
-
-        // collect document parts
-        $searchParts = array(
-            $this->getMainPartName() => &$this->tempDocumentMainPart,
-        );
-        // define templates
-        // result can be verified via "Open XML SDK 2.5 Productivity Tool" (http://www.microsoft.com/en-us/download/details.aspx?id=30425)
-        $imgTpl = $this->getImageTemplate();
-
-        foreach ($searchParts as $partFileName => &$partContent) {
-            $partVariables = $this->getVariablesForPart($partContent);
-
-            foreach ($searchReplace as $searchString => $replaceImage) {
-                $varsToReplace = array_filter($partVariables, function ($partVar) use ($searchString) {
-                    return ($partVar == $searchString) || preg_match('/^' . preg_quote($searchString) . ':/', $partVar);
-                });
-
-                foreach ($varsToReplace as $varNameWithArgs) {
-                    $varInlineArgs = $this->getImageArgs($varNameWithArgs);
-
-                    $preparedImageAttrs = $this->prepareImageAttrs($replaceImage, $varInlineArgs);
-                    $imgPath = $preparedImageAttrs['src'];
-
-                    // get image index
-                    $imgIndex = $this->getNextRelationsIndex($partFileName);
-                    $rid = 'rId' . $imgIndex;
-
-                    // replace preparations
-                    $this->addImageToRelations($partFileName, $rid, $imgPath, $preparedImageAttrs['mime']);
-                    $xmlImage = str_replace(array('{IMAGEID}', '{WIDTH}', '{HEIGHT}'), array($imgIndex, $preparedImageAttrs['width'], $preparedImageAttrs['height']), $imgTpl);
-
-                    // replace variable
-                    $varNameWithArgsFixed = self::ensureMacroCompleted($varNameWithArgs);
-                    $matches = array();
-                    if (preg_match('/(<[^<]+>)([^<]*)(' . preg_quote($varNameWithArgsFixed) . ')([^>]*)(<[^>]+>)/Uu', $partContent, $matches)) {
-                        $wholeTag = $matches[0];
-                        array_shift($matches);
-                        list($openTag, $prefix, , $postfix, $closeTag) = $matches;
-                        $replaceXml = $openTag . $prefix . $closeTag . $xmlImage . $openTag . $postfix . $closeTag;
-                        // replace on each iteration, because in one tag we can have 2+ inline variables => before proceed next variable we need to change $partContent
-                        $partContent = $this->setValueForPart($wholeTag, $replaceXml, $partContent);
-                    }
-                }
-            }
-        }
-
-        $this->document = $this->tempDocumentMainPart;
-    }
-
     public function getImageTemplate(): string
     {
-        return '</w:t></w:r><w:r><w:drawing><wp:inline xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"> <wp:extent cx="{WIDTH}" cy="{HEIGHT}"/> <wp:docPr id="{IMAGEID}" name=""/> <wp:cNvGraphicFramePr> <a:graphicFrameLocks noChangeAspect="1"/> </wp:cNvGraphicFramePr> <a:graphic> <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"> <pic:pic> <pic:nvPicPr> <pic:cNvPr id="{IMAGEID}" name=""/> <pic:cNvPicPr/> </pic:nvPicPr> <pic:blipFill> <a:blip r:embed="rId{IMAGEID}"/> <a:stretch> <a:fillRect/> </a:stretch> </pic:blipFill> <pic:spPr> <a:xfrm> <a:off x="0" y="0"/> <a:ext cx="{WIDTH}" cy="{HEIGHT}"/> </a:xfrm> <a:prstGeom prst="rect"> <a:avLst/> </a:prstGeom> </pic:spPr> </pic:pic> </a:graphicData> </a:graphic> </wp:inline> </w:drawing></w:r><w:r><w:t xml:space="preserve">';
+        return '</w:t></w:r><w:r><w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"> <wp:extent cx="{WIDTH}" cy="{HEIGHT}"/> <wp:docPr id="{IMAGEID}" name=""/> <wp:cNvGraphicFramePr> <a:graphicFrameLocks noChangeAspect="1"/> </wp:cNvGraphicFramePr> <a:graphic> <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"> <pic:pic> <pic:nvPicPr> <pic:cNvPr id="{IMAGEID}" name=""/> <pic:cNvPicPr/> </pic:nvPicPr> <pic:blipFill> <a:blip r:embed="rId{IMAGEID}"/> <a:stretch> <a:fillRect/> </a:stretch> </pic:blipFill> <pic:spPr> <a:xfrm> <a:off x="0" y="0"/> <a:ext cx="{WIDTH}" cy="{HEIGHT}"/> </a:xfrm> <a:prstGeom prst="rect"> <a:avLst/> </a:prstGeom> </pic:spPr> </pic:pic> </a:graphicData> </a:graphic> </wp:inline> </w:drawing></w:r><w:r><w:t xml:space="preserve">';
     }
 
     /**

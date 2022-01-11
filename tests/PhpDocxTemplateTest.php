@@ -712,14 +712,6 @@ class PhpDocxTemplateTest extends TestCase
     {
         $reporter = new PhpDocxTemplate(self::TEMPLATE8);
 
-        $imagePath = __DIR__ . "/images/earth.jpg";
-
-        $variablesReplace = array(
-            'earth' => array('path' => $imagePath, 'width' => 300, 'height' => 300)
-        );
-
-        $reporter->setImageValue(array_keys($variablesReplace), $variablesReplace);
-
         $reporter->render(["records" => [
             [
                 "a" => "a1",
@@ -750,7 +742,7 @@ class PhpDocxTemplateTest extends TestCase
         $expectedContentTypesXml = $expectedDocumentZip->getFromName('[Content_Types].xml');
         $expectedDocumentRelationsXml = $expectedDocumentZip->getFromName('word/_rels/document.xml.rels');
         $expectedMainPartXml = $expectedDocumentZip->getFromName('word/document.xml');
-        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId5_document.jpeg');
+        $expectedImage = $expectedDocumentZip->getFromName('word/media/image_rId5_document.png');
         if (false === $expectedDocumentZip->close()) {
             throw new \Exception("Could not close zip file \"{$docName}\".");
         }
