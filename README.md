@@ -30,7 +30,7 @@ $template->save("./documents/report.docx");
 
 ## Acknowledgements
 
-PhpDocxTemplate draws inspiration from the [python-docx-template](https://github.com/elapouya/python-docx-template) library.
+PhpDocxTemplate draws inspiration from the [python-docx-template](https://github.com/elapouya/python-docx-template) library and [PhpWord](https://github.com/PHPOffice/PHPWord).
 
 ## License
 
