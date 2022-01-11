@@ -3,6 +3,7 @@
 namespace PhpDocxTemplate\Twig\Impl;
 
 use Twig\Extension\AbstractExtension;
+use Twig\Markup;
 use Twig\TwigFunction;
 use PhpDocxTemplate\Twig\RendererInterface;
 
@@ -25,8 +26,8 @@ class QrCodeExtension extends AbstractExtension
         $this->renderer = $renderer;
     }
 
-    public function qrCode(string $url, int $size = 100, int $margin = 10): string
+    public function qrCode(string $url, int $size = 100, int $margin = 10, string $unit = 'px'): object
     {
-        return $this->renderer->render($url, $size, $margin);
+        return new Markup($this->renderer->render($url, $size, $margin, $unit), 'UTF-8');
     }
 }

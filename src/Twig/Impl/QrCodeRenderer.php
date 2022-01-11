@@ -16,7 +16,7 @@ class QrCodeRenderer implements RendererInterface
         $this->template = $template;
     }
 
-    public function render(string $url, int $size = 100, int $margin = 10): string
+    public function render(string $url, int $size = 100, int $margin = 10, string $unit = 'px'): string
     {
         $qrCode = new QrCode($url);
         $qrCode->setSize($size);
@@ -27,7 +27,7 @@ class QrCodeRenderer implements RendererInterface
         $result->saveToFile($path);
 
         $docx = $this->template->getDocx();
-        $preparedImageAttrs = $docx->prepareImageAttrs(['path' => $path, 'width' => $size, 'height' => $size]);
+        $preparedImageAttrs = $docx->prepareImageAttrs(['path' => $path, 'width' => $size, 'height' => $size, 'unit'=>$unit]);
         $imgPath = $preparedImageAttrs['src'];
 
         // get image index
@@ -36,7 +36,7 @@ class QrCodeRenderer implements RendererInterface
 
         // replace preparations
         $docx->addImageToRelations($docx->getMainPartName(), $rid, $imgPath, $preparedImageAttrs['mime']);
-        $xmlImage = str_replace(array('{RID}', '{WIDTH}', '{HEIGHT}'), array($rid, $preparedImageAttrs['width'], $preparedImageAttrs['height']), $docx->getImageTemplate());
+        $xmlImage = str_replace(array('{IMAGEID}', '{WIDTH}', '{HEIGHT}'), array($imgIndex, $preparedImageAttrs['width'], $preparedImageAttrs['height']), $docx->getImageTemplate());
         return $xmlImage;
     }
 }
