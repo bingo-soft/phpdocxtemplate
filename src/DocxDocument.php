@@ -24,6 +24,8 @@ class DocxDocument
     private $tempDocumentRelations = [];
     private $tempDocumentContentTypes = '';
     private $tempDocumentNewImages = [];
+    private $tempDocumentHeaders = [];
+    private $tempDocumentFooters = [];
 
     /**
      * Construct an instance of Document
@@ -58,6 +60,17 @@ class DocxDocument
         $this->zipClass->open($this->path);
         $this->zipClass->extractTo($this->tmpDir);
 
+        $index = 1;
+        while (false !== $this->zipClass->locateName($this->getHeaderName($index))) {
+            $this->tempDocumentHeaders[$index] = $this->readPartWithRels($this->getHeaderName($index));
+            $index++;
+        }
+        $index = 1;
+        while (false !== $this->zipClass->locateName($this->getFooterName($index))) {
+            $this->tempDocumentFooters[$index] = $this->readPartWithRels($this->getFooterName($index));
+            $index++;
+        }
+
         $this->tempDocumentMainPart = $this->readPartWithRels($this->getMainPartName());
 
         $this->tempDocumentContentTypes = $this->zipClass->getFromName($this->getDocumentContentTypesName());
@@ -73,6 +86,32 @@ class DocxDocument
     public function getDocumentMainPart(): string
     {
         return $this->tempDocumentMainPart;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHeaders(): array
+    {
+        return $this->tempDocumentHeaders;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFooters(): array
+    {
+        return $this->tempDocumentFooters;
+    }
+
+    public function setHeaders(array $headers): void
+    {
+        $this->tempDocumentHeaders = $headers;
+    }
+
+    public function setFooters(array $footers): void
+    {
+        $this->tempDocumentFooters = $footers;
     }
 
     /**
@@ -635,6 +674,13 @@ class DocxDocument
 
         $this->savePartWithRels($this->getMainPartName());
         file_put_contents($this->tmpDir . DIRECTORY_SEPARATOR . $this->getDocumentContentTypesName(), $this->tempDocumentContentTypes);
+
+        foreach ($this->tempDocumentHeaders as $index => $xml) {
+            file_put_contents($this->tmpDir . DIRECTORY_SEPARATOR . $this->getHeaderName($index), $xml);
+        }
+        foreach ($this->tempDocumentFooters as $index => $xml) {
+            file_put_contents($this->tmpDir . DIRECTORY_SEPARATOR . $this->getFooterName($index), $xml);
+        }
 
         $files = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($rootPath),

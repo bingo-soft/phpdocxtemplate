@@ -429,7 +429,6 @@ class PhpDocxTemplate
         );
         $template->addExtension($ext);
 
-
         $dstXml = $template->render('index', $context);
 
         $dstXml = str_replace(
@@ -476,6 +475,9 @@ class PhpDocxTemplate
         $xmlSrc = $this->buildXml($context);
         $newXml = $this->docx->fixTables($xmlSrc);
         $this->updateXml($newXml);
+
+        $this->renderHeaders($context);
+        $this->renderFooters($context);
     }
 
     /**
@@ -488,6 +490,20 @@ class PhpDocxTemplate
         //$this->preProcessing();
         $this->docx->save($path);
         //$this->postProcessing($path);
+    }
+
+    public function renderHeaders(array $context): void
+    {
+        $this->docx->setHeaders(array_map(function ($header) use ($context) {
+            return $this->renderXml($header, $context);
+        }, $this->docx->getHeaders()));
+    }
+
+    public function renderFooters(array $context): void
+    {
+        $this->docx->setFooters(array_map(function ($footer) use ($context) {
+            return $this->renderXml($footer, $context);
+        }, $this->docx->getFooters()));
     }
 
     /**

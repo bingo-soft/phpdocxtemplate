@@ -9,7 +9,10 @@
     "email": "bingosoft@bk.ru"
   }],
   "config": {
-    "vendor-dir": "./vendor"
+    "vendor-dir": "./vendor",
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
   },
   "require": {
     "ext-zip": "*",
