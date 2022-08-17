@@ -23,7 +23,7 @@ class PhpDocxTemplateTest extends TestCase
     public function testXmlToString(): void
     {
         $xml = new DOMDocument('1.0');
-        $root = $xml->createElement('book');
+        $root = $xml->createElement('w:body');
         $root = $xml->appendChild($root);
         $title = $xml->createElement('title');
         $title = $root->appendChild($title);
@@ -33,7 +33,7 @@ class PhpDocxTemplateTest extends TestCase
 
         $this->assertEquals(
             $reporter->xmlToString($xml),
-            "<?xml version=\"1.0\"?>\n<book><title>Title</title></book>\n"
+            "<?xml version=\"1.0\"?>\n<w:body><title>Title</title></w:body>\n"
         );
         $reporter->close();
     }
@@ -99,7 +99,7 @@ class PhpDocxTemplateTest extends TestCase
         //test stripTags
         $xml = "{<tag>%Hello</w:t><w:t>\nworld%<tag>}\n{<tag>{Hi</w:t><w:t>\nthere}<tag>}\n";
         $this->assertEquals(
-            $reporter->patchXml($xml),
+            $reporter->patchXmlChunk($xml),
             "{%Hello\nworld%}\n{{Hi\nthere}}\n"
         );
 
@@ -109,7 +109,7 @@ class PhpDocxTemplateTest extends TestCase
                "<w:gridSpan88MJ@1bX/><w:tcPrL4><w:gridSpan@1bY/>?Nl`z:^kY@FXeJ@P{8WhCt0__/,8woI2." .
                "8#[r_Cqig!5Qt{8gl5ls<9Ci|^QN2IK#L[cB9@:XclVQQIxe</w:tc>";
         $this->assertEquals(
-            $reporter->patchXml($xml),
+            $reporter->patchXmlChunk($xml),
             '<w:tc xeLLm[t6;cT&!Z_#KI8cniins[)UX>TAnAaqg_a}sePvK.OO#Q=B-]cBDFM8UL]8m@iCtTkuSd<w:tcPrL4>' .
             '<w:gridSpan w:val="{{val}}"/><w:gridSpan@1bY/>?Nl`z:^kY@FXeJ@P{8WhCt0__/,8woI2.8#[r_Cqig!5Qt' .
             '{8gl5ls<9Ci|^QN2IK#L[cB9@:XclVQQIxe</w:tc>'
@@ -121,7 +121,7 @@ class PhpDocxTemplateTest extends TestCase
                "<w:shd88MJ@1bX/><w:tcPrL4><w:shd@1bY/>?Nl`z:^kY@FXeJ@P{8WhCt0__/,8woI2." .
                "8#[r_Cqig!5Qt{8gl5ls<9Ci|^QN2IK#L[cB9@:XclVQQIxe</w:tc>";
         $this->assertEquals(
-            $reporter->patchXml($xml),
+            $reporter->patchXmlChunk($xml),
             '<w:tc xeLLm[t6;cT&!Z_#KI8cniins[)UX>TAnAaqg_a}sePvK.OO#Q=B-]cBDFM8UL]8m@iCtTkuSd<w:tcPrL4>' .
             '<w:shd w:val="clear" w:color="auto" w:fill="{{val}}"/><w:shd@1bY/>?Nl`z:^kY@FXeJ@P{8WhCt0__/,' .
             '8woI2.8#[r_Cqig!5Qt{8gl5ls<9Ci|^QN2IK#L[cB9@:XclVQQIxe</w:tc>'
@@ -129,7 +129,7 @@ class PhpDocxTemplateTest extends TestCase
 
         $xml = "{%r _Rom{X=aC3/s#W#~o<#d:tH^>DTAz;s<}O0RJ#V!wW:]%kR@wzLf*\iu^zAGrr!3]v<SUc|B)o>kA.:*1?,0%}";
         $this->assertEquals(
-            $reporter->patchXml($xml),
+            $reporter->patchXmlChunk($xml),
             '</w:t></w:r><w:r><w:t xml:space="preserve">{%r _Rom{X=aC3/s#W#~o<#d:tH^>DTAz;s<}O0RJ#V!wW:]%kR' .
             '@wzLf*\iu^zAGrr!3]v<SUc|B)o>kA.:*1?,0%}</w:t></w:r><w:r><w:t xml:space="preserve">'
         );
@@ -138,7 +138,7 @@ class PhpDocxTemplateTest extends TestCase
         $xml = "<w:tc></w:tcPr>t/H-Q.X)jC_sI6(J7w-;QI&JpDG}:>f02Zls<8(7&SEyc>" .
                "`@P/<Ero^KEbL`EX^<w:t>{% vm %}</w:t></w:tc>";
         $this->assertEquals(
-            $reporter->patchXml($xml),
+            $reporter->patchXmlChunk($xml),
             '<w:tc><w:vMerge w:val="{% if loop.first %}restart{% else %}continue' .
             '{% endif %}"/></w:tcPr>t/H-Q.X)jC_sI6(J7w-;QI&JpDG}:>f02Zls<8(7&SEyc>`' .
             '@P/<Ero^KEbL`EX^<w:t>{% if loop.first %}{% endif %}</w:t></w:tc>'
@@ -148,7 +148,7 @@ class PhpDocxTemplateTest extends TestCase
         $xml = "<w:tc></w:tcPr>t/H-Q.X)jC_sI6(J7w-;QI&JpDG}:>f02Zls<8(7&SEyc>" .
                "`@P/<Ero^KEbL`EX^<w:t>{% hm %}</w:t></w:tc>";
         $this->assertEquals(
-            $reporter->patchXml($xml),
+            $reporter->patchXmlChunk($xml),
             '{% if loop.first %}<w:tc><w:gridSpan w:val="{{ loop.length }}"/></w:tcPr>t/H-Q.X)' .
             'jC_sI6(J7w-;QI&JpDG}:>f02Zls<8(7&SEyc>`@P/<Ero^KEbL`EX^<w:t></w:t></w:tc>{% endif %}'
         );
@@ -156,7 +156,7 @@ class PhpDocxTemplateTest extends TestCase
         // test cleanTags
         $xml = '{%&#8216;&lt;&gt;“”‘’%}';
         $this->assertEquals(
-            $reporter->patchXml($xml),
+            $reporter->patchXmlChunk($xml),
             "{%'<>\"\"''%}"
         );
         $reporter->close();
