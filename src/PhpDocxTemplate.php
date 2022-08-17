@@ -3,7 +3,6 @@
 namespace PhpDocxTemplate;
 
 use DOMDocument;
-use DOMElement;
 use Twig\Loader\ArrayLoader;
 use Twig\Environment;
 use PhpDocxTemplate\Twig\Impl\{
@@ -99,16 +98,44 @@ class PhpDocxTemplate
         $this->docx->updateDOMDocument($xml);
     }
 
+    public function patchXml(string $xml): string
+    {
+        $matches = [];
+
+        preg_match('/^.*?(<w:body>)/s', $xml, $matches);
+
+        $beforeXml = $matches[0];
+
+        preg_match('/(<\/w:body>).*?$/s', $xml, $matches);
+
+        $afterXml = $matches[0];
+
+        $dom = new DOMDocument();
+        $dom->loadXML($xml);
+
+        $elBody = $dom->getElementsByTagName('body')->item(0);
+
+        $chunkXml = '';
+
+        for ($itemIdx = 0; $itemIdx < $elBody->childNodes->count(); $itemIdx++) {
+            $el = $elBody->childNodes->item($itemIdx);
+
+            $chunkXml .= $this->patchXmlChunk($el->ownerDocument->saveXML($el));
+        }
+
+        return sprintf('%s%s%s', $beforeXml, $chunkXml, $afterXml);
+    }
+
     /**
      * Patch initial xml
      *
      * @param string $xml - initial xml
      */
-    public function patchXml(string $xml): string
+    public function patchXmlChunk(string $xml): string
     {
-        $xml = preg_replace('/(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})/mu', '', $xml);
+        $xml = preg_replace('/(?<={)(<[^>]*>)+(?=[\{%\#])|(?<=[%\}\#])(<[^>]*>)+(?=\})/mu', '', $xml);
         $xml = preg_replace_callback(
-            '/{%(?:(?!%}).)*|{{(?:(?!}}).)*/mu',
+            '/{%(?:(?!%}).)*|{#(?:(?!#}).)*|{{(?:(?!}}).)*/mu',
             array(get_class($this), 'stripTags'),
             $xml
         );
@@ -262,7 +289,7 @@ class PhpDocxTemplate
      *
      * @return string
      */
-    private function stripTags(array $matches): string
+    private static function stripTags(array $matches): string
     {
         return preg_replace('/<\/w:t>.*?(<w:t>|<w:t [^>]*>)/mu', '', $matches[0]);
     }
@@ -274,7 +301,7 @@ class PhpDocxTemplate
      *
      * @return string
      */
-    private function colspan(array $matches): string
+    private static function colspan(array $matches): string
     {
         $cellXml = $matches[1] . $matches[3];
         $cellXml = preg_replace('/<w:r[ >](?:(?!<w:r[ >]).)*<w:t><\/w:t>.*?<\/w:r>/mu', '', $cellXml);
