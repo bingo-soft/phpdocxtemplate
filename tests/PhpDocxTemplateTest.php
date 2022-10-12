@@ -105,9 +105,9 @@ class PhpDocxTemplateTest extends TestCase
 
         //test colspan
         $xml = "<w:tc xeLLm[t6;cT&!Z_#KI8cniins[)UX>TAnAaqg_a}sePvK.OO#Q=B-]cBDFM8UL]8m@i" .
-               "Ct{% colspan val%}TkuSd<w:r meg+PYSJWO}~k<w:t></w:t></w:r>" .
-               "<w:gridSpan88MJ@1bX/><w:tcPrL4><w:gridSpan@1bY/>?Nl`z:^kY@FXeJ@P{8WhCt0__/,8woI2." .
-               "8#[r_Cqig!5Qt{8gl5ls<9Ci|^QN2IK#L[cB9@:XclVQQIxe</w:tc>";
+            "Ct{% colspan val%}TkuSd<w:r meg+PYSJWO}~k<w:t></w:t></w:r>" .
+            "<w:gridSpan88MJ@1bX/><w:tcPrL4><w:gridSpan@1bY/>?Nl`z:^kY@FXeJ@P{8WhCt0__/,8woI2." .
+            "8#[r_Cqig!5Qt{8gl5ls<9Ci|^QN2IK#L[cB9@:XclVQQIxe</w:tc>";
         $this->assertEquals(
             $reporter->patchXmlChunk($xml),
             '<w:tc xeLLm[t6;cT&!Z_#KI8cniins[)UX>TAnAaqg_a}sePvK.OO#Q=B-]cBDFM8UL]8m@iCtTkuSd<w:tcPrL4>' .
@@ -117,9 +117,9 @@ class PhpDocxTemplateTest extends TestCase
 
         //test cellbg
         $xml = "<w:tc xeLLm[t6;cT&!Z_#KI8cniins[)UX>TAnAaqg_a}sePvK.OO#Q=B-]cBDFM8UL]8m@i" .
-               "Ct{% cellbg val%}TkuSd<w:r meg+PYSJWO}~k<w:t></w:t></w:r>" .
-               "<w:shd88MJ@1bX/><w:tcPrL4><w:shd@1bY/>?Nl`z:^kY@FXeJ@P{8WhCt0__/,8woI2." .
-               "8#[r_Cqig!5Qt{8gl5ls<9Ci|^QN2IK#L[cB9@:XclVQQIxe</w:tc>";
+            "Ct{% cellbg val%}TkuSd<w:r meg+PYSJWO}~k<w:t></w:t></w:r>" .
+            "<w:shd88MJ@1bX/><w:tcPrL4><w:shd@1bY/>?Nl`z:^kY@FXeJ@P{8WhCt0__/,8woI2." .
+            "8#[r_Cqig!5Qt{8gl5ls<9Ci|^QN2IK#L[cB9@:XclVQQIxe</w:tc>";
         $this->assertEquals(
             $reporter->patchXmlChunk($xml),
             '<w:tc xeLLm[t6;cT&!Z_#KI8cniins[)UX>TAnAaqg_a}sePvK.OO#Q=B-]cBDFM8UL]8m@iCtTkuSd<w:tcPrL4>' .
@@ -136,7 +136,7 @@ class PhpDocxTemplateTest extends TestCase
 
         // test vMerge
         $xml = "<w:tc></w:tcPr>t/H-Q.X)jC_sI6(J7w-;QI&JpDG}:>f02Zls<8(7&SEyc>" .
-               "`@P/<Ero^KEbL`EX^<w:t>{% vm %}</w:t></w:tc>";
+            "`@P/<Ero^KEbL`EX^<w:t>{% vm %}</w:t></w:tc>";
         $this->assertEquals(
             $reporter->patchXmlChunk($xml),
             '<w:tc><w:vMerge w:val="{% if loop.first %}restart{% else %}continue' .
@@ -146,7 +146,7 @@ class PhpDocxTemplateTest extends TestCase
 
         // test hMerge
         $xml = "<w:tc></w:tcPr>t/H-Q.X)jC_sI6(J7w-;QI&JpDG}:>f02Zls<8(7&SEyc>" .
-               "`@P/<Ero^KEbL`EX^<w:t>{% hm %}</w:t></w:tc>";
+            "`@P/<Ero^KEbL`EX^<w:t>{% hm %}</w:t></w:tc>";
         $this->assertEquals(
             $reporter->patchXmlChunk($xml),
             '{% if loop.first %}<w:tc><w:gridSpan w:val="{{ loop.length }}"/></w:tcPr>t/H-Q.X)' .
@@ -754,48 +754,48 @@ class PhpDocxTemplateTest extends TestCase
     public function testSections(): void
     {
         $reporter = new PhpDocxTemplate(self::TEMPLATE9);
-       /* $this->assertEquals(
-            $reporter->buildXml(["object" => "world"]),
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" .
-            "<w:document xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" " .
-            "xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" " .
-            "xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" " .
-            "xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" " .
-            "xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" " .
-            "xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" " .
-            "xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" " .
-            "xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" " .
-            "xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" " .
-            "xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" " .
-            "xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" " .
-            "xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" " .
-            "xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" " .
-            "xmlns:o=\"urn:schemas-microsoft-com:office:office\" " .
-            "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" " .
-            "xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" " .
-            "xmlns:v=\"urn:schemas-microsoft-com:vml\" " .
-            "xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" " .
-            "xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" " .
-            "xmlns:w10=\"urn:schemas-microsoft-com:office:word\" " .
-            "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" " .
-            "xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" " .
-            "xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" " .
-            "xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" " .
-            "xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" " .
-            "xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" " .
-            "xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" " .
-            "xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" " .
-            "xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\" " .
-            "mc:Ignorable=\"w14 w15 w16se w16cid wp14\"><w:body><w:p w14:paraId=\"504F2588\" " .
-            "w14:textId=\"54DF26C8\" w:rsidR=\"0090657C\" w:rsidRPr=\"00FA3F61\" " .
-            "w:rsidRDefault=\"00FA3F61\" w:rsidP=\"00C13DD6\"><w:pPr><w:rPr><w:lang w:val=\"en-US\"/>" .
-            "</w:rPr></w:pPr><w:r><w:rPr><w:lang w:val=\"en-US\"/></w:rPr><w:t>Hello world!</w:t>" .
-            "</w:r><w:bookmarkStart w:id=\"0\" w:name=\"_GoBack\"/><w:bookmarkEnd w:id=\"0\"/></w:p>" .
-            "<w:sectPr w:rsidR=\"0090657C\" w:rsidRPr=\"00FA3F61\"><w:pgSz w:w=\"11906\" w:h=\"16838\"/>" .
-            "<w:pgMar w:top=\"1134\" w:right=\"850\" w:bottom=\"1134\" w:left=\"1701\" w:header=\"708\" " .
-            "w:footer=\"708\" w:gutter=\"0\"/><w:cols w:space=\"708\"/><w:docGrid w:linePitch=\"360\"/>" .
-            "</w:sectPr></w:body></w:document>\n"
-        );*/
+        /* $this->assertEquals(
+             $reporter->buildXml(["object" => "world"]),
+             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" .
+             "<w:document xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" " .
+             "xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" " .
+             "xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" " .
+             "xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" " .
+             "xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" " .
+             "xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" " .
+             "xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" " .
+             "xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" " .
+             "xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" " .
+             "xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" " .
+             "xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" " .
+             "xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" " .
+             "xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" " .
+             "xmlns:o=\"urn:schemas-microsoft-com:office:office\" " .
+             "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" " .
+             "xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" " .
+             "xmlns:v=\"urn:schemas-microsoft-com:vml\" " .
+             "xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" " .
+             "xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" " .
+             "xmlns:w10=\"urn:schemas-microsoft-com:office:word\" " .
+             "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" " .
+             "xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" " .
+             "xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" " .
+             "xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" " .
+             "xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" " .
+             "xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" " .
+             "xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" " .
+             "xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" " .
+             "xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\" " .
+             "mc:Ignorable=\"w14 w15 w16se w16cid wp14\"><w:body><w:p w14:paraId=\"504F2588\" " .
+             "w14:textId=\"54DF26C8\" w:rsidR=\"0090657C\" w:rsidRPr=\"00FA3F61\" " .
+             "w:rsidRDefault=\"00FA3F61\" w:rsidP=\"00C13DD6\"><w:pPr><w:rPr><w:lang w:val=\"en-US\"/>" .
+             "</w:rPr></w:pPr><w:r><w:rPr><w:lang w:val=\"en-US\"/></w:rPr><w:t>Hello world!</w:t>" .
+             "</w:r><w:bookmarkStart w:id=\"0\" w:name=\"_GoBack\"/><w:bookmarkEnd w:id=\"0\"/></w:p>" .
+             "<w:sectPr w:rsidR=\"0090657C\" w:rsidRPr=\"00FA3F61\"><w:pgSz w:w=\"11906\" w:h=\"16838\"/>" .
+             "<w:pgMar w:top=\"1134\" w:right=\"850\" w:bottom=\"1134\" w:left=\"1701\" w:header=\"708\" " .
+             "w:footer=\"708\" w:gutter=\"0\"/><w:cols w:space=\"708\"/><w:docGrid w:linePitch=\"360\"/>" .
+             "</w:sectPr></w:body></w:document>\n"
+         );*/
         $docName = './doc9.docx';
         $reporter->render(["object" => "test", "section" => [["id" => "test section"]]]);
         $reporter->save($docName);
@@ -805,7 +805,7 @@ class PhpDocxTemplateTest extends TestCase
         $expectedDocumentZip->open($docName);
         $header = $expectedDocumentZip->getFromName('word/header2.xml');
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . PHP_EOL .
-'<w:hdr xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" ' .
+            '<w:hdr xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" ' .
             'xmlns:cx="http://schemas.microsoft.com/office/drawing/2014/chartex" xmlns:cx1=' .
             '"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex" xmlns:cx2="http:' .
             '//schemas.microsoft.com/office/drawing/2015/10/21/chartex" xmlns:cx3="http://sche' .
