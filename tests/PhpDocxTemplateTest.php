@@ -1,14 +1,12 @@
 <?php
 
-namespace Doctrine\Tests\DBAL\Query;
+namespace Tests;
 
 use PHPUnit\Framework\TestCase;
 use DOMDocument;
 use PhpDocxTemplate\PhpDocxTemplate;
 use PhpDocxTemplate\DocxDocument;
 use ZipArchive;
-use Twig\Loader\ArrayLoader;
-use Twig\Environment;
 
 class PhpDocxTemplateTest extends TestCase
 {
@@ -165,6 +163,7 @@ class PhpDocxTemplateTest extends TestCase
     public function testRenderXml(): void
     {
         $reporter = new PhpDocxTemplate(self::TEMPLATE1);
+
         $this->assertEquals(
             $reporter->buildXml(["object" => "world"]),
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" .
@@ -205,7 +204,7 @@ class PhpDocxTemplateTest extends TestCase
             "<w:sectPr w:rsidR=\"0090657C\" w:rsidRPr=\"00FA3F61\"><w:pgSz w:w=\"11906\" w:h=\"16838\"/>" .
             "<w:pgMar w:top=\"1134\" w:right=\"850\" w:bottom=\"1134\" w:left=\"1701\" w:header=\"708\" " .
             "w:footer=\"708\" w:gutter=\"0\"/><w:cols w:space=\"708\"/><w:docGrid w:linePitch=\"360\"/>" .
-            "</w:sectPr></w:body></w:document>\n"
+            "</w:sectPr></w:body></w:document>"
         );
         $reporter->close();
     }
