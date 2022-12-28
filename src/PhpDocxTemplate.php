@@ -3,6 +3,7 @@
 namespace PhpDocxTemplate;
 
 use DOMDocument;
+use Twig\Extension\ExtensionInterface;
 use Twig\Loader\ArrayLoader;
 use Twig\Environment;
 use PhpDocxTemplate\Twig\Impl\{
@@ -32,6 +33,8 @@ class PhpDocxTemplate
     private $crcToNewEmbedded;
     private $picToReplace;
     private $picMap;
+
+    private $twigExtensions = [];
 
     /**
      * Construct an instance of PhpDocxTemplate
@@ -427,6 +430,16 @@ class PhpDocxTemplate
     }
 
     /**
+     * Добавить пользовательское расширение
+     *
+     * @param ExtensionInterface $ext
+     */
+    public function addTwigExtensions(ExtensionInterface $ext): void
+    {
+        $this->twigExtensions[] = $ext;
+    }
+
+    /**
      * Render xml
      *
      * @param string $srcXml - source xml
@@ -442,6 +455,12 @@ class PhpDocxTemplate
             'index' => $srcXml,
         ]));
 
+        /**
+         * Пользовательские расширения
+         */
+        foreach ($this->twigExtensions as $ext) {
+            $template->addExtension($ext);
+        }
 
         $ext = new ImageExtension();
         $ext->setRenderer(
